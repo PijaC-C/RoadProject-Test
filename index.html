@@ -3,269 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <title>กรอกข้อมูลโครงการถนน 2569</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Taviraj:wght@400;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    html, body {
+      height: 100%; width: 100%; margin: 0; padding: 0;
+      background: linear-gradient(135deg, #e4ffef 0%, #b0ffe1 100%);
+      font-family: 'Torsilp ReiyngKhwam', 'Taviraj', 'Noto Sans Thai', sans-serif;
+    }
     body {
-      font-family: 'Noto Sans Thai', sans-serif;
-      background: linear-gradient(135deg, #f3f3ff, #e0f0ff);
-      padding: 40px;
+      min-height: 100vh; min-width: 100vw;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+    }
+    .project-title {
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 999;
+      background: linear-gradient(135deg, #e4ffef 70%, #b0ffe1 100%);
+      padding: 10px 0 5px 0;
+      width: 100vw;
+      font-size: 1.5em;
+      color: #217057;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 0.01em;
+      font-family: inherit;
+      text-shadow: 0 1px 5px rgba(30,160,100,0.06);
+      margin-bottom: 0;
+      border-bottom: 2px solid #c2f5dc;
       display: flex;
-      flex-direction: column;
       align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
-    .fade-in {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 1s ease forwards;
-    }
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: none;
-      }
-    }
-    .container {
-      display: flex;
-      flex-direction: row;
-      gap: 40px;
-      max-width: 1200px;
-      width: 100%;
-    }
-    form {
-      background-color: white;
-      padding: 30px;
-      border-radius: 20px;
-      width: 400px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .project-title img, .project-title svg {
+      height: 1.5em;
+      margin-right: 8px;
+      margin-bottom: 0;
     }
     h1, h2, h3 {
-      color: #2e3a59;
-      font-size: 1.5em;
-      margin-bottom: 1em;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 600;
-      color: #333;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      background-color: #f9f9f9;
-      font-size: 1em;
-    }
-    button {
-      width: 100%;
-      background-color: #4a6cf7;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 1em;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #3a55d1;
-    }
-    .note {
-      font-size: 0.9em;
-      color: #666;
+      color: #27604b;
+      font-size: 1.15em;
       text-align: center;
-      margin-top: 10px;
+      margin-bottom: 1em;
+      margin-top: 0.4em;
     }
-    #map {
-      flex: 1;
-      height: 500px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    #summary-section {
-      margin-top: 60px;
+    .block-title {
+      color: #18805d;
+      font-size: 1.05em;
+      font-weight: bold;
+      margin: 14px 0 5px 0;
+      letter-spacing: 0.01em;
+      text-align: left;
       width: 100%;
-      max-width: 1200px;
+      padding-left: 6px;
     }
-    #map-summary {
-      height: 500px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+    .maincenter { width: 100vw; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; margin: 0; margin-top: 200px; }
+    .container { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; width: 100vw; gap: 40px; max-width: 1200px; margin-top: 32px; }
+    .map-block, .form-block { display: flex; flex-direction: column; align-items: center; background: #dcffee; border-radius: 18px; box-shadow: 0 0 16px 0 rgba(0,0,0,0.08); padding: 20px 0 32px 0; margin-bottom: 16px; min-width: 400px; flex: 1 1 420px; }
+    .map-block .block-title { padding-left: 48px; }
+     .form-block { background: #fff; box-shadow: 0 4px 16px rgba(40,180,130,0.10); min-width: 350px; max-width: 400px; margin: 48px 0 0 0; align-self: center; justify-content: center; padding: 32px 28px; }
+    form { display: flex; flex-direction: column; width: 100%; align-items: center; justify-content: center; }
+    label { font-weight: 700; color: #25846e; margin-bottom: 5px; align-self: flex-start; font-size: 1.03em; }
+    input, textarea { width: 100%; padding: 12px; margin-bottom: 14px; border: 1px solid #a5ded2; border-radius: 10px; background-color: #f6fffc; font-size: 1em; font-family: inherit; }
+    button { background: linear-gradient(90deg,#38b397 40%,#4a6cf7 100%); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 1.03em; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+    button:hover { background: #2e9187; }
+    .note { font-size: 0.98em; color: #51917f; text-align: center; margin-top: 7px; margin-bottom: 0; }
+    #map, #map-summary { width: 96%; min-width: 320px; max-width: 600px; height: 440px; border-radius: 15px; box-shadow: 0 0 16px 0 rgba(0,0,0,0.09); margin-bottom: 16px; background: #ebfaf5; margin-left: auto; margin-right: auto; z-index: 10; }
+    #responsibleChartBlock { width: 98%; max-width: 640px; background: #eafff3; border-radius: 14px; margin: 18px auto 0 auto; padding: 18px 10px; box-shadow: 0 0 12px 0 rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; }
+    #responsibleChart { max-width: 580px; width: 100%; height: 340px; }
+    #summary-section { margin-top: 35px; width: 100%; max-width: 1200px; }
+    @media (max-width: 1000px) { .container { flex-direction: column; align-items: center; gap: 0; } .form-block, .map-block { min-width: 90vw; max-width: 98vw; } #map, #map-summary, #responsibleChartBlock { min-width: 220px; width: 98vw; } .project-title { font-size: 1em; padding: 8px 0 4px 0; } }
   </style>
 </head>
 <body>
-  <div class="container fade-in">
-    <div style="flex: 1; display: flex; flex-direction: column;">
-      <h3 style="margin-top: 0; margin-bottom: 10px;">🗺️ วาดเส้นทางโครงการบนแผนที่</h3>
-      <div id="map"></div>
+  <div class="project-title">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36"><rect x="1" y="25" width="34" height="7" rx="1.8" fill="#ffd93b" stroke="#b28908" stroke-width="1.5"/><rect x="6" y="9" width="24" height="16" rx="2.5" fill="#fff" stroke="#85928b" stroke-width="1.4"/><rect x="7.5" y="11.5" width="6" height="5" rx="1" fill="#58cc02"/><rect x="15" y="11.5" width="6" height="5" rx="1" fill="#fa5667"/><rect x="22.5" y="11.5" width="6" height="5" rx="1" fill="#4a6cf7"/></svg>
+    <span><b>ระบบบันทึกและสรุปข้อมูลโครงการถนน (Road Project 2569)</b></span>
+  </div>
+  <div class="maincenter">
+    <div class="container">
+      <div class="map-block">
+        <div class="block-title">🗺️ วาดเส้นทางหรือจุดโครงการบนแผนที่</div>
+        <div id="map"></div>
+        <div id="responsibleChartBlock">
+          <b>กราฟจำนวนโครงการต่อผู้รับผิดชอบ</b>
+          <canvas id="responsibleChart"></canvas>
+        </div>
+      </div>
+      <div class="form-block">
+        <div class="block-title">📋 กรอกข้อมูลโครงการถนน</div>
+        <form id="roadForm" onsubmit="return submitToScript(event)">
+          <label for="project_name">ชื่อโครงการ</label>
+          <input type="text" id="project_name" required>
+          <label for="budget">วงเงิน (บาท)</label>
+          <input type="text" id="budget" required>
+          <label for="duration">ระยะเวลาดำเนินการ</label>
+          <input type="text" id="duration" required>
+          <label for="details">สิ่งที่ดำเนินการ</label>
+          <textarea id="details" rows="3" required></textarea>
+          <label for="responsible">ผู้รับผิดชอบ</label>
+          <input type="text" id="responsible" required>
+          <input type="hidden" id="polyline_data">
+          <button type="submit">ส่งข้อมูล</button>
+          <div class="note">* วาดจุดหรือเส้นทางบนแผนที่ก่อนส่ง</div>
+        </form>
+      </div>
     </div>
-    <form id="roadForm" onsubmit="return submitToScript(event)">
-      <h1>กรอกข้อมูลโครงการถนน ปี 2569</h1>
-      <label for="project_name">ชื่อโครงการ</label>
-      <input type="text" id="project_name" required>
-      <label for="budget">วงเงิน (บาท)</label>
-      <input type="text" id="budget" required>
-      <label for="duration">ระยะเวลาดำเนินการ</label>
-      <input type="text" id="duration" required>
-      <label for="details">สิ่งที่ดำเนินการ</label>
-      <textarea id="details" rows="4" required></textarea>
-      <label for="responsible">ผู้รับผิดชอบ</label>
-      <input type="text" id="responsible" required>
-      <input type="hidden" id="polyline_data">
-      <button type="submit">ส่งข้อมูล</button>
-      <div class="note">* วาดเส้นทางบนแผนที่ก่อนส่ง</div>
-    </form>
+    <div id="summary-section">
+      <h2>📍 ข้อมูลโครงการที่ส่งแล้ว</h2>
+      <div class="map-block"><div id="map-summary"></div></div>
+    </div>
   </div>
-
-  <div id="summary-section" class="fade-in">
-    <h2>📍 ข้อมูลโครงการประจำปี</h2>
-    <div id="map-summary"></div>
-  </div>
-
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
   <script>
-let map, drawnItems;
-
-window.onload = function () {
-  map = L.map('map').setView([13.736717, 100.523186], 12);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
-  drawnItems = new L.FeatureGroup();
-  map.addLayer(drawnItems);
-
-  const drawControl = new L.Control.Draw({
-    edit: {
-      featureGroup: drawnItems
-    },
-    draw: {
-      polyline: true,
-      polygon: false,
-      circle: false,
-      rectangle: false,
-      marker: true,
-      circlemarker: false
-    }
-  });
-  map.addControl(drawControl);
-
-  map.on('draw:created', function (e) {
-    drawnItems.clearLayers();
-    drawnItems.addLayer(e.layer);
-
-    const type = e.layerType;
-    const coords = type === 'marker'
-      ? [e.layer.getLatLng()]
-      : e.layer.getLatLngs()[0] || e.layer.getLatLngs();
-
-    document.getElementById('polyline_data').value = JSON.stringify(coords);
-  });
-
-  loadProjectsFromSheet();
-};
-
-function loadProjectsFromSheet() {
-  const sheetID = '14oqcYqvQHVJC9imxYVhalvS767GLoXrCdgXxQM6ciTs';
-  const url = `https://opensheet.elk.sh/${sheetID}/Sheet1`;
-
-  fetch(url)
-    .then(res => res.json())
-    .then(rows => {
-      const mapSummary = L.map('map-summary').setView([13.736717, 100.523186], 11);
+    // MAP INPUT (ซ้าย)
+    let map, drawnItems;
+    window.addEventListener('DOMContentLoaded', function() {
+      map = L.map('map').setView([13.736717, 100.523186], 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(mapSummary);
-
-      rows.forEach(row => {
-        if (!row.polyline) return;
-        try {
-          const coords = JSON.parse(row.polyline);
-          const latlngs = coords.map(c => L.latLng(c.lat || c.latLng?.lat || c[0], c.lng || c.latLng?.lng || c[1]));
-          const shape = latlngs.length === 1
-            ? L.marker(latlngs[0])
-            : L.polyline(latlngs, { color: 'deeppink', weight: 5 });
-
-          const popup = `<b>${row.project_name}</b><br>วงเงิน: ${row.budget}<br>ดำเนินการ: ${row.details}`;
-          shape.bindPopup(popup).addTo(mapSummary);
-        } catch (e) {
-          console.error("ไม่สามารถ parse polyline ได้", row.polyline);
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+      drawnItems = new L.FeatureGroup();
+      map.addLayer(drawnItems);
+      new L.Control.Draw({
+        edit: { featureGroup: drawnItems },
+        draw: { polyline: true, marker: true, polygon: false, rectangle: false, circle: false, circlemarker: false }
+      }).addTo(map);
+      map.on(L.Draw.Event.CREATED, e => {
+        drawnItems.clearLayers();
+        const layer = e.layer;
+        drawnItems.addLayer(layer);
+        let coords = [];
+        if (layer instanceof L.Polyline) {
+          coords = layer.getLatLngs().map(p => [p.lat, p.lng]);
+        } else if (layer instanceof L.Marker) {
+          const p = layer.getLatLng();
+          coords = [[p.lat, p.lng]];
         }
+        document.getElementById('polyline_data').value = JSON.stringify(coords);
       });
-    })
-    .catch(err => console.error("โหลดข้อมูลล้มเหลว:", err));
-}
-  </script>
-
-  <script>
-function submitToScript(e) {
-  e.preventDefault();
-
-  const polylineField = document.getElementById('polyline_data');
-  const polyline = polylineField ? polylineField.value.trim() : '';
-  let coords;
-
-  try {
-    coords = JSON.parse(polyline);
-  } catch (err) {
-    coords = [];
-  }
-
-  if (!Array.isArray(coords) || coords.length < 1) {
-    const form = document.getElementById("roadForm");
-    let alert = document.getElementById("alert-warning");
-    if (!alert) {
-      alert = document.createElement("div");
-      alert.id = "alert-warning";
-      alert.style.backgroundColor = "#ffe4e1";
-      alert.style.color = "#b30000";
-      alert.style.padding = "10px";
-      alert.style.borderRadius = "10px";
-      alert.style.marginTop = "10px";
-      alert.style.fontWeight = "bold";
-      alert.style.textAlign = "center";
-      form.appendChild(alert);
-    }
-    alert.textContent = "⚠️ กรุณาวาดอย่างน้อย 1 จุดบนแผนที่ก่อนส่งข้อมูล";
-    return false;
-  } else {
-    const existingAlert = document.getElementById("alert-warning");
-    if (existingAlert) existingAlert.remove();
-  }
-
-  const params = new URLSearchParams({
-    project_name: document.getElementById('project_name').value,
-    budget: document.getElementById('budget').value,
-    duration: document.getElementById('duration').value,
-    details: document.getElementById('details').value,
-    responsible: document.getElementById('responsible').value,
-    polyline: polyline
-  });
-
-  fetch("https://script.google.com/macros/s/AKfycbyOGBZrW89OuYEJ88jKK6PlhQp4oi2mnjV8sxJAY2rZfazs_OQttiRQ7dMr_NAbUev4/exec?" + params.toString())
-    .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
-    .then(data => {
-      document.getElementById("roadForm").reset();
-      document.getElementById("polyline_data").value = "";
-      drawnItems.clearLayers();
-      alert("✅ ขอบคุณสำหรับข้อมูลที่ส่ง!");
       loadProjectsFromSheet();
-    })
-    .catch(err => {
-      console.error(err);
-      alert("❌ เกิดข้อผิดพลาด: " + err);
     });
+    // ส่งข้อมูลไป Apps Script
+    function submitToScript(e) {
+      e.preventDefault();
+      const polyline = document.getElementById('polyline_data').value.trim();
+      let coords = [];
+      try { coords = JSON.parse(polyline); } catch {}
+      const isValid = Array.isArray(coords) && coords.length > 0 && Array.isArray(coords[0]) && coords[0].length === 2;
+      if (!isValid) {
+        alert("⚠️ กรุณาวาดจุดหรือเส้นทางก่อนส่งข้อมูล");
+        return false;
+      }
+      const params = new URLSearchParams({
+        project_name: document.getElementById('project_name').value,
+        budget: document.getElementById('budget').value,
+        duration: document.getElementById('duration').value,
+        details: document.getElementById('details').value,
+        responsible: document.getElementById('responsible').value,
+        polyline: polyline
+      });
+      fetch("https://script.google.com/macros/s/AKfycbyOGBZrW89OuYEJ88jKK6PlhQp4oi2mnjV8sxJAY2rZfazs_OQttiRQ7dMr_NAbUev4/exec?" + params.toString())
+        .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
+        .then(data => {
+          alert("✅ ข้อมูลถูกส่งเรียบร้อยแล้ว");
+          document.getElementById("roadForm").reset();
+          document.getElementById("polyline_data").value = "";
+          drawnItems.clearLayers();
+          loadProjectsFromSheet();
+        })
+        .catch(err => alert("❌ เกิดข้อผิดพลาด: " + err));
+      return false;
+    }
+    // MAP SUMMARY (ขวาล่าง)
+    let mapSummary, chart;
+    function loadProjectsFromSheet() {
+      const sheetID = '14oqcYqvQHVJC9imxYVhalvS767GLoXrCdgXxQM6ciTs';
+      const url = `https://opensheet.elk.sh/${sheetID}/Sheet1`;
+      // โหลดโครงการทั้งหมดในแผนที่
+      if (mapSummary) mapSummary.remove();
+      mapSummary = L.map('map-summary').setView([13.736717, 100.523186], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(mapSummary);
+      fetch(url)
+        .then(res => res.json())
+        .then(rows => {
+          // วาดข้อมูลบน map-summary
+          rows.forEach(row => {
+            if (!row.polyline) return;
+            try {
+              const coords = JSON.parse(row.polyline);
+              const latlngs = coords.map(c => L.latLng(c[0], c[1]));
+              let shape;
+              if (latlngs.length === 1) {
+                shape = L.marker(latlngs[0]);
+              } else {
+                shape = L.polyline(latlngs, { color: 'deeppink', weight: 5 });
+              }
+              const popup = `<b>${row.project_name}</b><br>วงเงิน: ${row.budget}<br>ดำเนินการ: ${row.details}`;
+              shape.bindPopup(popup).addTo(mapSummary);
+            } catch (e) {
+              console.error('❌ ไม่สามารถ parse polyline ได้:', row.polyline);
+            }
+          });
 
-  return false;
-}
+          // ===== กราฟจำนวนนับผู้รับผิดชอบ =====
+          const responsibleCounts = {};
+          rows.forEach(row => {
+            const resp = (row.responsible || '').trim();
+            if (!resp) return;
+            responsibleCounts[resp] = (responsibleCounts[resp] || 0) + 1;
+          });
+          const sortedNames = Object.keys(responsibleCounts).sort((a, b) => responsibleCounts[b] - responsibleCounts[a]);
+          const labels = sortedNames;
+          const data = sortedNames.map(name => responsibleCounts[name]);
+
+          if (chart) chart.destroy();
+          chart = new Chart(document.getElementById('responsibleChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'จำนวนโครงการ',
+                data: data,
+                backgroundColor: 'rgba(56,179,151,0.7)',
+                borderColor: 'rgba(40,128,120,0.9)',
+                borderWidth: 1,
+                borderRadius: 8,
+                barPercentage: 0.7,
+                categoryPercentage: 0.6
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                title: { display: false }
+              },
+              scales: {
+                y: { beginAtZero: true, ticks: { precision:0 } },
+                x: { ticks: { font: { weight: 'bold' }}}
+              }
+            }
+          });
+        });
+    }
   </script>
 </body>
 </html>

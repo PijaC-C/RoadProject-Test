@@ -1,0 +1,263 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function accessPath(uid) {
+      return /databases/$(database)/documents/user_access/$(uid);
+    }
+
+    function hasAccessDocument() {
+      return signedIn() && exists(accessPath(request.auth.uid));
+    }
+
+    function isActiveRole(role) {
+      return hasAccessDocument()
+        && get(accessPath(request.auth.uid)).data.active == true
+        && get(accessPath(request.auth.uid)).data.role == role;
+    }
+
+    function canReadProjects() {
+      return isActiveRole('reader') || isActiveRole('editor') || isActiveRole('admin');
+    }
+
+    function isAdmin() {
+      return isActiveRole('admin');
+    }
+
+    function isAssignedEditor() {
+      return isActiveRole('editor')
+        && request.auth.uid in resource.data.get('editorUids', []);
+    }
+
+    function isEditorSafeProjectUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'name', 'desc', 'budget', 'duration', 'agency', 'status',
+        'docLink', 'streetViewLink',
+        'imageUrl', 'imagePublicId', 'imageBytes', 'imageUploadedAt',
+        'lat', 'lng', 'path', 'pathSegments',
+        'contractNumber', 'contractorName',
+        'plannedStartDate', 'plannedEndDate', 'updateDate',
+        'plannedProgress', 'progress', 'currentWork',
+        'updatePhotos', 'obstacleLog', 'projectLog',
+        'cloudinaryCleanupPending', 'slideFields',
+        'geometryUpdatedAt', 'geometryUpdatedBy', 'updatedAt'
+      ]);
+    }
+
+    function hasValidEditorUids() {
+      return request.resource.data.get('editorUids', []) is list;
+    }
+
+    function isSafePublicProject() {
+      return request.resource.data.keys().hasOnly([
+          'type', 'name', 'desc', 'status', 'duration', 'agency', 'imageUrl',
+          'lat', 'lng', 'path', 'pathSegments', 'progress', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll(['type', 'name', 'status'])
+        && request.resource.data.status == 'กำลังก่อสร้าง';
+    }
+
+    function isSafeBridge() {
+      return request.resource.data.keys().hasOnly([
+          'sourceId', 'name', 'district', 'location', 'category',
+          'responsibilityGroup', 'crossingType', 'crossingName',
+          'structure', 'ocr', 'spanLength', 'stairs', 'clearance',
+          'link', 'mediaLink', 'lat', 'lng', 'importedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'sourceId', 'name', 'district', 'location', 'category',
+          'responsibilityGroup', 'crossingType', 'crossingName',
+          'structure', 'ocr', 'spanLength', 'stairs', 'clearance',
+          'link', 'mediaLink', 'lat', 'lng', 'importedAt'
+        ])
+        && request.resource.data.sourceId is string
+        && request.resource.data.name is string
+        && request.resource.data.district is string
+        && request.resource.data.location is string
+        && request.resource.data.category is string
+        && request.resource.data.responsibilityGroup is string
+        && request.resource.data.crossingType is string
+        && request.resource.data.crossingName is string
+        && request.resource.data.structure is string
+        && request.resource.data.ocr is string
+        && request.resource.data.spanLength is string
+        && request.resource.data.stairs is string
+        && request.resource.data.clearance is string
+        && request.resource.data.link is string
+        && request.resource.data.mediaLink is string
+        && request.resource.data.lat is number
+        && request.resource.data.lng is number
+        && request.resource.data.importedAt is number;
+    }
+
+    function isSafeFutureProject() {
+      return request.resource.data.keys().hasOnly([
+          'sourceId', 'name', 'planHorizon', 'geometryType',
+          'path', 'vertexCount', 'importedAt', 'updatedAt', 'updatedBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'sourceId', 'name', 'planHorizon', 'geometryType',
+          'path', 'vertexCount', 'importedAt'
+        ])
+        && request.resource.data.sourceId is string
+        && request.resource.data.name is string
+        && request.resource.data.planHorizon in ['5-year', '20-year']
+        && request.resource.data.geometryType in ['Point', 'LineString']
+        && request.resource.data.path is list
+        && request.resource.data.vertexCount is int
+        && request.resource.data.vertexCount >= 1
+        && request.resource.data.vertexCount <= 5000
+        && request.resource.data.path.size() == request.resource.data.vertexCount
+        && (
+          (request.resource.data.geometryType == 'Point' && request.resource.data.vertexCount == 1)
+          || (request.resource.data.geometryType == 'LineString' && request.resource.data.vertexCount > 1)
+        )
+        && request.resource.data.importedAt is number
+        && request.resource.data.get('updatedAt', 0) is number
+        && request.resource.data.get('updatedBy', '') is string
+        && (
+          !request.resource.data.keys().hasAny(['updatedBy'])
+          || request.resource.data.updatedBy == request.auth.uid
+        );
+    }
+
+    // This collection belongs only to bridge-scope-live. Keep it separate
+    // from the existing ProMap collections so the web project can be rebuilt
+    // without losing field observations.
+    function isSafeBridgeRecord() {
+      return request.resource.data.keys().hasOnly([
+          'bridgeCode', 'date', 'inspector', 'overall', 'items',
+          'updated', 'updatedBy', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'bridgeCode', 'date', 'inspector', 'overall', 'items',
+          'updated', 'updatedBy', 'updatedAt'
+        ])
+        && request.resource.data.bridgeCode is string
+        && request.resource.data.date is string
+        && request.resource.data.inspector is string
+        && request.resource.data.overall is string
+        && request.resource.data.items is map
+        && request.resource.data.items.size() <= 20
+        && request.resource.data.updated is string
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt is timestamp;
+    }
+
+    function isSafeCustomBridge() {
+      return request.resource.data.keys().hasOnly([
+          'code', 'name', 'district', 'road', 'lat', 'lng', 'custom',
+          'createdBy', 'createdAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'code', 'name', 'district', 'road', 'lat', 'lng', 'custom',
+          'createdBy', 'createdAt'
+        ])
+        && request.resource.data.code is string
+        && request.resource.data.name is string
+        && request.resource.data.district is string
+        && request.resource.data.road is string
+        && request.resource.data.lat is number
+        && request.resource.data.lat >= -90
+        && request.resource.data.lat <= 90
+        && request.resource.data.lng is number
+        && request.resource.data.lng >= -180
+        && request.resource.data.lng <= 180
+        && request.resource.data.custom == true
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt is timestamp;
+    }
+
+    match /bma_projects/{projectId} {
+      allow read: if canReadProjects();
+      allow create: if isAdmin() && hasValidEditorUids();
+      allow delete: if isAdmin();
+      allow update: if hasValidEditorUids()
+        && (isAdmin() || (isAssignedEditor() && isEditorSafeProjectUpdate()));
+    }
+
+    match /public_projects/{projectId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isSafePublicProject();
+      allow delete: if isAdmin();
+    }
+
+    match /bma_bridges/{bridgeId} {
+      allow read: if canReadProjects();
+      allow create, update: if isAdmin() && isSafeBridge();
+      allow delete: if isAdmin();
+    }
+
+    match /future_projects/{futureProjectId} {
+      allow read: if canReadProjects();
+      allow create, update: if isAdmin() && isSafeFutureProject();
+      allow delete: if isAdmin();
+    }
+
+    match /user_access/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.auth.token.email != null
+        && request.resource.data.keys().hasOnly([
+          'email', 'displayName', 'role', 'active', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'email', 'displayName', 'role', 'active', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role == 'pending'
+        && request.resource.data.active == false
+        && request.resource.data.email is string
+        && request.resource.data.displayName is string
+        && request.resource.data.createdAt is number
+        && request.resource.data.updatedAt is number;
+
+      allow update: if isAdmin()
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.role in ['pending', 'reader', 'editor', 'admin']
+        && request.resource.data.active is bool
+        && (
+          request.resource.data.role != 'pending'
+          || request.resource.data.active == false
+        )
+        && request.resource.data.displayName is string
+        && request.resource.data.updatedAt is number
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'role', 'active', 'updatedAt'
+        ])
+        && (
+          request.auth.uid != uid
+          || (
+            request.resource.data.role == 'admin'
+            && request.resource.data.active == true
+          )
+        );
+
+      allow delete: if false;
+    }
+
+    match /bridge_scope_records/{bridgeId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && isSafeBridgeRecord();
+      allow delete: if false;
+    }
+
+    match /bridge_scope_custom_bridges/{bridgeId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && isSafeCustomBridge();
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

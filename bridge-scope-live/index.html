@@ -97,6 +97,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="bridge-work-catalog.js"></script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
@@ -300,12 +301,22 @@
       catch(err){console.error('Firestore save failed',err);toast('บันทึกในเครื่องแล้ว แต่ซิงก์ไม่สำเร็จ')}
     }
 
-    function reportPage(b,r){
+    function reportPageLegacy(b,r){
       let rows=W.filter(i=>r.items?.[i.id]?.sel).map(i=>{
         let v=r.items[i.id], amount=(v.qty||0)*i.price;
         return `<tr><td>${i.id}</td><td>${e(i.name)}${v.note?`<br><small>${e(v.note)}</small>`:''}</td><td>${m(v.qty)}</td><td>${e(v.unit||i.unit)}</td><td>${m(i.price)}</td><td>${m(amount)}</td></tr>`;
       }).join('')||'<tr><td colspan="6">ยังไม่ได้เลือกเนื้องาน</td></tr>';
       return `<section class="p"><h1>สรุปเนื้องานซ่อมสะพานลอยคนเดิน</h1><h2>${e(b.code)} • ${e(b.name)}</h2><p>เขต${e(b.district)} • ถนน${e(b.road)} • ${b.lat.toFixed(6)}, ${b.lng.toFixed(6)}</p><p>วันที่สำรวจ ${e(r.date||'-')} • ผู้สำรวจ ${e(r.inspector||'-')}</p><table><tr><th>ข้อ</th><th>รายการ</th><th>ปริมาณ</th><th>หน่วย</th><th>ราคาต่อหน่วย</th><th>จำนวนเงิน</th></tr>${rows}</table><h3>รวมประมาณการ ${m(sum(r))} บาท</h3><p>หมายเหตุ: ${e(r.overall||'-')}</p></section>`;
+    }
+
+    function calculatorWorkRows(r){
+      return Array.isArray(r?.calculator?.workItems) ? r.calculator.workItems.filter(x=>x&&Number(x.quantity)>=0).map(x=>({...x,quantity:Number(x.quantity)||0,rate:Number(x.rate)||0,amount:Number(x.amount)||((Number(x.quantity)||0)*(Number(x.rate)||0))})) : null;
+    }
+    function reportPage(b,r){
+      const calcRows=calculatorWorkRows(r), useCalculator=Array.isArray(calcRows);
+      const rows=useCalculator?calcRows.map(v=>`<tr><td>${e(v.code||v.id||'-')}</td><td>${e(v.name||'-')}${v.note?`<br><small>${e(v.note)}</small>`:''}</td><td>${m(v.quantity)}</td><td>${e(v.unit||'-')}</td><td>${m(v.rate)}</td><td>${m(v.amount)}</td></tr>`).join(''):(W.filter(i=>r.items?.[i.id]?.sel).map(i=>{let v=r.items[i.id],amount=(v.qty||0)*i.price;return `<tr><td>${i.id}</td><td>${e(i.name)}${v.note?`<br><small>${e(v.note)}</small>`:''}</td><td>${m(v.qty)}</td><td>${e(v.unit||i.unit)}</td><td>${m(i.price)}</td><td>${m(amount)}</td></tr>`;}).join(''))||'<tr><td colspan="6">ยังไม่ได้เลือกเนื้องาน</td></tr>';
+      const total=useCalculator?calcRows.reduce((s,v)=>s+v.amount,0):sum(r);
+      return `<section class="p"><h1>สรุปเนื้องานซ่อมสะพานลอยคนเดิน</h1><h2>${e(b.code)} • ${e(b.name)}</h2><p>เขต${e(b.district)} • ถนน${e(b.road)} • ${b.lat.toFixed(6)}, ${b.lng.toFixed(6)}</p><p>วันที่สำรวจ ${e(r.date||'-')} • ผู้สำรวจ ${e(r.inspector||'-')}</p><table><tr><th>ข้อ</th><th>รายการ</th><th>ปริมาณ</th><th>หน่วย</th><th>ราคาต่อหน่วย</th><th>จำนวนเงิน</th></tr>${rows}</table><h3>รวมประมาณการ ${m(total)} บาท</h3><p>หมายเหตุ: ${e(r.overall||'-')}</p></section>`;
     }
 
     function pdf(codes){
@@ -314,7 +325,7 @@
       let report=window.open('','_blank');
       if(!report){alert('กรุณาอนุญาต Pop-up');return}
       report.document.open();
-      report.document.write(`<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>สรุปเนื้องานซ่อมสะพาน</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap"><style>@page{size:A4;margin:12mm}body{font-family:"Noto Sans Thai",Tahoma,sans-serif;margin:0;color:#172331}.bar{position:sticky;top:0;background:#123f67;color:#fff;padding:10px}.bar button{font:inherit;font-weight:700;padding:8px 12px}.p{padding:12mm;page-break-after:always}.p:last-child{page-break-after:auto}.p h1{color:#123f67;font-size:20px}.p h2{font-size:15px}.p p{font-size:11px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #888;padding:5px}th{background:#eaf1f7}.p h3{text-align:right}@media print{.bar{display:none}.p{padding:0}}</style></head><body><div class="bar"><button id="printReport">พิมพ์ / บันทึกเป็น PDF</button></div>${saved.map(c=>reportPage(B.find(b=>b.code===c),R[c])).join('')}</body></html>`);
+      report.document.write(`<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>สรุปเนื้องานซ่อมสะพาน</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans Thai:wght@400;700&display=swap"><style>@page{size:A4;margin:12mm}body{font-family:"Noto Sans Thai",Tahoma,sans-serif;margin:0;color:#172331}.bar{position:sticky;top:0;background:#123f67;color:#fff;padding:10px}.bar button{font:inherit;font-weight:700;padding:8px 12px}.p{padding:12mm;page-break-after:always}.p:last-child{page-break-after:auto}.p h1{color:#123f67;font-size:20px}.p h2{font-size:15px}.p p{font-size:11px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #888;padding:5px}th{background:#eaf1f7}.p h3{text-align:right}@media print{.bar{display:none}.p{padding:0}}</style></head><body><div class="bar"><button id="printReport">พิมพ์ / บันทึกเป็น PDF</button></div>${saved.map(c=>reportPage(B.find(b=>b.code===c),R[c])).join('')}</body></html>`);
       report.document.close();
       report.document.getElementById('printReport').onclick=()=>report.print();
       report.focus();
@@ -331,6 +342,7 @@
       if(!code||code!==sel)return;
       let r=collectRecord();
       r.calculator=data.calculatorState||r.calculator||null;
+      if(r.calculator&&Array.isArray(data.workItems))r.calculator.workItems=data.workItems;
       const setCalcItem=(id,q,unit)=>{
         let prev=r.items[id]||{};
         if(!q?.valid){

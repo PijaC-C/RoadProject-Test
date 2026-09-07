@@ -45,4 +45,10 @@ window.BRIDGE_SURVEY_DATA = {
   BR730:{sourceRef:'รายงานตรวจสอบครั้งที่ 1 ปี 2564 · BR730.pdf',structureType:'คอนกรีตเสริมเหล็ก',clearanceHeight:6.37,clearanceHeights:[6.37],spanCount:2,stairs:2,spans:[{L:25,sectionType:'1',A:2.35,B:.7,C:1.05,S:null},{L:25.1,sectionType:'1',A:2.35,B:.7,C:1.05,S:null}]},
   BR741:{sourceRef:'รายงานตรวจสอบครั้งที่ 1 ปี 2564 · BR741.pdf',structureType:'คอนกรีตเสริมเหล็ก',clearanceHeight:5.41,clearanceHeights:[5.41],spanCount:1,stairs:2,spans:[{L:21.6,sectionType:'1',A:2.3,B:1,C:1,S:null}]}
 };
+// จากภาพถ่ายในรายงานตรวจสอบ: กลุ่มที่เห็นหลังคาคลุมทางเดินชัดเจน
+// รายการนี้เป็นค่าเริ่มต้นที่แก้ไขได้ในหน้าเครื่องคำนวณ ไม่ใช่ปริมาณงานจาก PDF ราคากลาง
+const BRIDGE_ROOFED_FROM_REPORT = new Set(['BR160','BR376','BR400','BR423','BR425']);
+Object.entries(window.BRIDGE_SURVEY_DATA).forEach(([code, record]) => {
+  record.roofStatus = BRIDGE_ROOFED_FROM_REPORT.has(code) ? 'has' : 'none';
+});
 console.assert(Object.keys(window.BRIDGE_SURVEY_DATA).length === 40, 'Matched survey report data must contain 40 bridge records');

@@ -40,7 +40,7 @@ function sampleSurvey(){return {bridgeId:'BR682',bridgeName:'BR682',structureTyp
 function makeSurveySpan(index,record){const r=record||{};return {id:r.id||uid(),type:'span',side:'',name:'Span '+String(index).padStart(2,'0'),shape:'surveySection',sectionType:String(r.sectionType??''),surveyIndex:index-1,d:{A:r.A??null,B:r.B??null,C:r.C??null,S:r.S??null,L:r.L??null,usableTopWidth:r.usableTopWidth??null},useUsableTopWidth:r.useUsableTopWidth===true,faces:{top:true},pendingMeasurement:false};}
 function pendingColumn(index){const c=make('column',index);c.pendingMeasurement=true;c.pendingReason='ยังไม่มีมิติจากการสำรวจ';c.d={B:null,D:null,H:null,capB:null,capD:null,capH:null};return c;}
 function pendingStair(side,index){const c=make('stair',index,side);c.pendingMeasurement=true;c.pendingReason='ยังไม่มีมิติจากการสำรวจ';c.stairType='type1';c.d={B:null,H:null,maxRiser:null,tread:null,flights:null,waist:null,landingL:null,landingR:null,R:null,n:null};return c;}
-function newState(){const survey=sampleSurvey(),s={version:9,unit:'m',layout:{spans:1,columns:2,leftStairs:1,rightStairs:1},crackRepair:0,reportMeta:{bridgeId:survey.bridgeId,bridgeName:survey.bridgeName,sourceRef:survey.sourceRef,structureType:survey.structureType,roofStatus:survey.roofStatus},survey,components:[],workScope:{}};syncLayout(s);s.overrides.puStair={enabled:false,value:null};s.overrides.mortar={enabled:true,value:null};s.overrides.marking={enabled:false,value:null};return s;}
+function newState(){const survey=sampleSurvey(),s={version:9,unit:'m',layout:{spans:1,columns:2,leftStairs:1,rightStairs:1},crackRepair:0,reportMeta:{bridgeId:survey.bridgeId,bridgeName:survey.bridgeName,sourceRef:survey.sourceRef,structureType:survey.structureType,roofStatus:survey.roofStatus},survey,components:[],workScope:{}};syncLayout(s);s.overrides={puDeck:{enabled:false,value:0},puStair:{enabled:false,value:0},mortar:{enabled:false,value:0},marking:{enabled:false,value:0},crack:{enabled:false,value:0}};s.crackRepair=0;return s;}
 function reportSurvey(code){const source=window.BRIDGE_SURVEY_DATA?.[code];if(!source)return null;const spans=(source.spans||[]).map(r=>({L:r.L??null,sectionType:String(r.sectionType??''),A:r.A??null,B:r.B??null,C:r.C??null,S:r.S??null,usableTopWidth:r.usableTopWidth??null,useUsableTopWidth:r.useUsableTopWidth===true}));const clearanceHeights=Array.isArray(source.clearanceHeights)&&source.clearanceHeights.length?source.clearanceHeights.map(Number).filter(Number.isFinite):[Number(source.clearanceHeight)].filter(Number.isFinite);return {bridgeId:code,bridgeName:code,structureType:String(source.structureType||''),roofStatus:['has','none','unknown'].includes(source.roofStatus)?source.roofStatus:'unknown',clearanceHeight:Number(source.clearanceHeight??clearanceHeights[0])||null,clearanceHeights,spanCount:spans.length||Number(source.spanCount)||1,floorOffset:null,stairRise:null,stairRiseMode:'pending',sourceRef:String(source.sourceRef||('รายงานตรวจสอบ · '+code)),active:true,spans};}
 function mergeMatchedReport(s){if(!bridgeQuery||!s||typeof s!=='object')return s;const matched=reportSurvey(bridgeQuery);if(!matched)return s;const old=s.survey&&typeof s.survey==='object'?s.survey:{};const keep=(value,fallback)=>value===null||value===undefined||value===''?fallback:value;const oldSpans=Array.isArray(old.spans)?old.spans:[];s.survey={...matched,...old,bridgeId:keep(old.bridgeId,matched.bridgeId),bridgeName:keep(old.bridgeName,matched.bridgeName),structureType:keep(old.structureType,matched.structureType),roofStatus:keep(old.roofStatus,matched.roofStatus),clearanceHeight:keep(old.clearanceHeight,matched.clearanceHeight),clearanceHeights:Array.isArray(old.clearanceHeights)&&old.clearanceHeights.length?old.clearanceHeights:matched.clearanceHeights,spanCount:keep(old.spanCount,matched.spanCount),sourceRef:keep(old.sourceRef,matched.sourceRef),spans:matched.spans.map((reportSpan,i)=>{const saved=oldSpans[i]||{};return {...reportSpan,...saved,L:keep(saved.L,reportSpan.L),sectionType:keep(saved.sectionType,reportSpan.sectionType),A:keep(saved.A,reportSpan.A),B:keep(saved.B,reportSpan.B),C:keep(saved.C,reportSpan.C),S:keep(saved.S,reportSpan.S),usableTopWidth:keep(saved.usableTopWidth,reportSpan.usableTopWidth),useUsableTopWidth:saved.useUsableTopWidth===true};})};return s;}
 function bridgeState(){const s=newState();if(!bridgeQuery)return s;const matched=reportSurvey(bridgeQuery);if(matched){s.survey={...s.survey,...matched};s.layout.spans=matched.spanCount;s.layout.columns=0;s.components=[];syncLayout(s);ensureEnhancedState(s);return s;}s.survey.bridgeId=bridgeQuery;s.survey.bridgeName=bridgeQuery;s.survey.sourceRef='จากแผนที่ '+bridgeQuery;s.survey.active=true;s.survey.spans=[{L:null,sectionType:'',A:null,B:null,C:null,S:null,usableTopWidth:null,useUsableTopWidth:false}];s.survey.spanCount=1;s.layout.spans=1;s.components=[];syncLayout(s);ensureEnhancedState(s);return s;}
@@ -143,13 +143,29 @@ function ensureEnhancedState(s){
     const old=s.overrides[k];
     if(old&&typeof old==='object'&&!Array.isArray(old)){
       old.enabled=old.enabled===true;
-      if(old.value===undefined)old.value=k==='crack'?(s.crackRepair??0):null;
+      if(old.value===undefined)old.value=0;
     }else if(old!==undefined){s.overrides[k]={enabled:true,value:old};}
-    else s.overrides[k]={enabled:k==='crack',value:k==='crack'?(s.crackRepair??0):null};
+    else s.overrides[k]={enabled:false,value:0};
   });
   const crack=s.overrides.crack;
   if(crack&&crack.value!==null&&crack.value!==undefined)s.crackRepair=crack.value;
   if(s.stairCalculationVersion!==1){['puStair','marking'].forEach(k=>{if(s.overrides[k].value===null||s.overrides[k].value==='')s.overrides[k].enabled=false;});s.stairCalculationVersion=1;}
+  return s;
+}
+const QUANTITY_RESET_VERSION=1;
+function resetQuantityState(s){
+  if(!s||typeof s!=='object'||s.quantityResetVersion===QUANTITY_RESET_VERSION)return s;
+  s.crackRepair=0;
+  if(!s.overrides||typeof s.overrides!=='object'||Array.isArray(s.overrides))s.overrides={};
+  const oldOverrides=s.overrides;
+  s.overrides={...oldOverrides};
+  QUANTITY_KEYS.forEach(k=>{const old=oldOverrides[k]&&typeof oldOverrides[k]==='object'&&!Array.isArray(oldOverrides[k])?oldOverrides[k]:{};s.overrides[k]={...old,enabled:false,value:0};});
+  if(!s.workScope||typeof s.workScope!=='object'||Array.isArray(s.workScope))s.workScope={};
+  const oldScope=s.workScope;
+  s.workScope={...oldScope};
+  WORK_CATALOG.forEach(item=>{const old=oldScope[item.id]&&typeof oldScope[item.id]==='object'&&!Array.isArray(oldScope[item.id])?oldScope[item.id]:{};s.workScope[item.id]={...old,enabled:false,quantity:0,source:''};});
+  s.workItems=[];
+  s.quantityResetVersion=QUANTITY_RESET_VERSION;
   return s;
 }
 function syncLayout(s){syncLayoutLegacy(s);ensureEnhancedState(s);}
@@ -300,6 +316,7 @@ window.addEventListener('message',event=>{
  if(data.type==='bridge-paint-request-save'&&data.bridgeCode===bridgeQuery){sendToMap();return;}
  if(data.type!=='bridge-paint-load-state'||data.bridgeCode!==bridgeQuery||!data.state)return;
  state=data.state;
+ resetQuantityState(state);
  mergeMatchedReport(state);
  ensureWorkScope(state);
  ensureEnhancedState(state);
@@ -376,6 +393,7 @@ function topView(){
   for(let i=0;i<l.columns;i++){const x=x0+(i+1)*(x1-x0)/(Math.max(1,l.columns+1));s+='<circle cx="'+x+'" cy="'+(deckY+deckH/2)+'" r="7" fill="#fff" stroke="#17324b" stroke-width="2"/><text x="'+x+'" y="'+(deckY+deckH+18)+'" text-anchor="middle">C'+(i+1)+'</text>';}
   const left=state.components.filter(c=>c.type==='stair'&&c.side==='left'),right=state.components.filter(c=>c.type==='stair'&&c.side==='right'),cy0=deckY+deckH/2;left.forEach((c,i)=>{const cy=cy0+(i-(left.length-1)/2)*rowGap;s+=topStairPlan(c,'left',x0,cy,i,left.length)+planConnectionLeader(x0,cy,deckY,deckH);});right.forEach((c,i)=>{const cy=cy0+(i-(right.length-1)/2)*rowGap;s+=topStairPlan(c,'right',x1,cy,i,right.length)+planConnectionLeader(x1,cy,deckY,deckH);});s+='<text x="'+(w/2)+'" y="'+(h-9)+'" text-anchor="middle" font-size="11">สีเหลืองคือชานพัก · เส้นประแสดงจุดเชื่อมเมื่อแยกรูปหลายชุด</text></svg>';return s;
 }
+resetQuantityState(state);
 ensureEnhancedState(state);
 bind();renderAll();saveState();
 </script>

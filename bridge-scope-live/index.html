@@ -179,9 +179,10 @@
     const K='bridge-live-v3-unsurveyed', CK='bridge-custom-v3-unsurveyed';
     const RECORDS_COLLECTION='bridge_scope_records_v3';
     const CUSTOM_COLLECTION='bridge_scope_custom_bridges_v3';
+    const QUANTITY_RESET_VERSION=1;
     const readStorage=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
     let R=readStorage(K,{}), customBridges=readStorage(CK,[]), B=[...D,...customBridges], sel=null, calcBridgeCode=null, calcFrameLoaded=false;
-    let authUser=null, recordsUnsub=null, customUnsub=null, migrationStarted=false, customMigrationStarted=false;
+    let authUser=null, recordsUnsub=null, customUnsub=null, migrationStarted=false, customMigrationStarted=false, quantityResetStarted=false, quantityResetInFlight=false;
     const $=s=>document.querySelector(s);
     const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const m=n=>new Intl.NumberFormat('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
@@ -194,15 +195,57 @@
     function toast(x){$('#toast').textContent=x;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),1600)}
     function setSyncStatus(x){$('#syncStatus').textContent=x;$('#syncStatus').title=x}
     function done(c){return !!R[c]?.updated}
-    function rec(c){return R[c]||(R[c]={date:t(),inspector:'',overall:'',items:{},calculator:null})}
+    function rec(c){return R[c]||(R[c]={date:t(),inspector:'',overall:'',items:{},calculator:null,workQuantityResetVersion:QUANTITY_RESET_VERSION})}
     function icon(c){return L.divIcon({className:'',html:`<div class="pin ${done(c)?'done':''}"><span>${e(c)}</span></div>`,iconSize:[32,32],iconAnchor:[16,32]})}
     function marker(b){let z=L.marker([b.lat,b.lng],{icon:icon(b.code)}).addTo(map).bindTooltip(`${e(b.code)} • ${e(b.name)}`);z.on('click',()=>openB(b.code));marks.set(b.code,z)}
 
     function recordPayload(code,record){
-      return {bridgeCode:code,date:record.date||t(),inspector:String(record.inspector||''),overall:String(record.overall||''),items:record.items||{},calculator:record.calculator||{},updated:record.updated||new Date().toISOString(),updatedBy:authUser.uid,updatedAt:serverTimestamp()};
+      return {bridgeCode:code,date:record.date||t(),inspector:String(record.inspector||''),overall:String(record.overall||''),items:record.items||{},calculator:record.calculator||{},workQuantityResetVersion:Number(record.workQuantityResetVersion)||0,updated:record.updated||new Date().toISOString(),updatedBy:authUser.uid,updatedAt:serverTimestamp()};
     }
     function normaliseRecord(data){
-      return {date:data.date||t(),inspector:data.inspector||'',overall:data.overall||'',items:data.items||{},calculator:data.calculator||null,updated:data.updated||''};
+      return {date:data.date||t(),inspector:data.inspector||'',overall:data.overall||'',items:data.items||{},calculator:data.calculator||null,workQuantityResetVersion:Number(data.workQuantityResetVersion)||0,updated:data.updated||''};
+    }
+    function resetSavedQuantityRecord(record){
+      const next={...record,items:{}};
+      Object.entries(record.items||{}).forEach(([id,item])=>{const old=item&&typeof item==='object'&&!Array.isArray(item)?item:{};next.items[id]={...old,sel:false,qty:0}});
+      let calc=record.calculator&&typeof record.calculator==='object'&&!Array.isArray(record.calculator)?JSON.parse(JSON.stringify(record.calculator)):null;
+      if(calc){
+        calc.crackRepair=0;
+        const oldOverrides=calc.overrides&&typeof calc.overrides==='object'&&!Array.isArray(calc.overrides)?calc.overrides:{};
+        calc.overrides={...oldOverrides};
+        ['puDeck','puStair','mortar','marking','crack'].forEach(k=>{const old=oldOverrides[k]&&typeof oldOverrides[k]==='object'&&!Array.isArray(oldOverrides[k])?oldOverrides[k]:{};calc.overrides[k]={...old,enabled:false,value:0}});
+        const oldScope=calc.workScope&&typeof calc.workScope==='object'&&!Array.isArray(calc.workScope)?calc.workScope:{};
+        calc.workScope={...oldScope};
+        (Array.isArray(window.BRIDGE_WORK_CATALOG)?window.BRIDGE_WORK_CATALOG:[]).forEach(item=>{const old=oldScope[item.id]&&typeof oldScope[item.id]==='object'&&!Array.isArray(oldScope[item.id])?oldScope[item.id]:{};calc.workScope[item.id]={...old,enabled:false,quantity:0,source:''}});
+        calc.workItems=[];
+        calc.quantityResetVersion=QUANTITY_RESET_VERSION;
+      }
+      next.calculator=calc;
+      next.workQuantityResetVersion=QUANTITY_RESET_VERSION;
+      return next;
+    }
+    async function migrateSavedQuantities(snap){
+      if(quantityResetInFlight)return true;
+      if(quantityResetStarted)return false;
+      quantityResetStarted=true;
+      const entries=[];
+      snap.forEach(docSnap=>{const data=docSnap.data();if(data.bridgeCode&&Number(data.workQuantityResetVersion)!==QUANTITY_RESET_VERSION)entries.push({code:data.bridgeCode,data})});
+      if(!entries.length)return false;
+      quantityResetInFlight=true;
+      setSyncStatus('กำลังตั้งปริมาณงานเป็นศูนย์…');
+      try{
+        const resets=entries.map(({code,data})=>({code,record:resetSavedQuantityRecord(normaliseRecord(data))}));
+        await Promise.all(resets.map(({code,record})=>setDoc(doc(db,RECORDS_COLLECTION,docId(code)),recordPayload(code,record))));
+        resets.forEach(({code,record})=>{R[code]=record});
+        localStorage.setItem(K,JSON.stringify(R));
+        setSyncStatus('ฐานข้อมูลพร้อมใช้งาน');
+        return true;
+      }catch(err){
+        console.error('Firestore quantity reset failed',err);
+        quantityResetStarted=false;
+        setSyncStatus('ตั้งปริมาณงานเป็นศูนย์ไม่สำเร็จ');
+        return false;
+      }finally{quantityResetInFlight=false}
     }
     async function migrateLocalRecords(){
       if(migrationStarted||!authUser)return false;
@@ -217,6 +260,7 @@
       recordsUnsub?.();
       recordsUnsub=onSnapshot(collection(db,RECORDS_COLLECTION),async snap=>{
         if(await migrateLocalRecords()){render();return}
+        if(await migrateSavedQuantities(snap)){render();return}
         if(snap.empty){
           R={};localStorage.setItem(K,JSON.stringify(R));render();setSyncStatus('ฐานข้อมูลพร้อมใช้งาน');return;
         }
@@ -289,7 +333,7 @@
         let item=W.find(y=>y.id===x.dataset.i);
         items[item.id]={sel:x.querySelector('input[type=checkbox]').checked,qty:Number(x.querySelector('.qty').value)||0,unit:x.querySelector('.unit').value||item.unit,note:x.querySelector('.note input').value};
       });
-      return {date:$('#date').value||t(),inspector:$('#inspector').value,overall:$('#overall').value,items,calculator:old.calculator||null,updated:mark?new Date().toISOString():(old.updated||'')};
+      return {date:$('#date').value||t(),inspector:$('#inspector').value,overall:$('#overall').value,items,calculator:old.calculator||null,workQuantityResetVersion:old.workQuantityResetVersion===undefined?QUANTITY_RESET_VERSION:Number(old.workQuantityResetVersion)||0,updated:mark?new Date().toISOString():(old.updated||'')};
     }
 
     function sum(r){return W.reduce((s,i)=>{let v=r.items?.[i.id];return s+(v?.sel?(v.qty||0)*i.price:0)},0)}
@@ -365,12 +409,16 @@
         }
         r.items[id]={...prev,sel:true,qty:Number(q.used)||0,unit,note:prev.note||'',source:'calculator'};
       };
-      let deck=data.quantities?.puDeck,stair=data.quantities?.puStair;
-      setCalcItem('1.6',{valid:!!(deck?.valid||stair?.valid),used:(deck?.valid?Number(deck.used)||0:0)+(stair?.valid?Number(stair.used)||0:0)},'ตร.ม.');
-      setCalcItem('1.2',data.quantities?.mortar,'ตร.ม.');
-      setCalcItem('1.8',data.quantities?.marking,'ตร.ม.');
-      let crack=data.quantities?.crack;
-      setCalcItem('1.4',crack?.enabled?crack:null,'ตร.ม.');
+      if(Array.isArray(data.workItems)){
+        Object.entries(r.items).forEach(([id,item])=>{r.items[id]={...(item||{}),sel:false,qty:0}});
+      }else{
+        let deck=data.quantities?.puDeck,stair=data.quantities?.puStair;
+        setCalcItem('1.6',{valid:!!(deck?.valid||stair?.valid),used:(deck?.valid?Number(deck.used)||0:0)+(stair?.valid?Number(stair.used)||0:0)},'ตร.ม.');
+        setCalcItem('1.2',data.quantities?.mortar,'ตร.ม.');
+        setCalcItem('1.8',data.quantities?.marking,'ตร.ม.');
+        let crack=data.quantities?.crack;
+        setCalcItem('1.4',crack?.enabled?crack:null,'ตร.ม.');
+      }
       R[code]=r;
       localStorage.setItem(K,JSON.stringify(R));
       marks.get(code)?.setIcon(icon(code));

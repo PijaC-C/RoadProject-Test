@@ -130,7 +130,7 @@ service cloud.firestore {
     function isSafeBridgeRecord() {
       return request.resource.data.keys().hasOnly([
           'bridgeCode', 'date', 'inspector', 'overall', 'items',
-          'updated', 'updatedBy', 'updatedAt'
+          'calculator', 'updated', 'updatedBy', 'updatedAt'
         ])
         && request.resource.data.keys().hasAll([
           'bridgeCode', 'date', 'inspector', 'overall', 'items',
@@ -142,6 +142,8 @@ service cloud.firestore {
         && request.resource.data.overall is string
         && request.resource.data.items is map
         && request.resource.data.items.size() <= 20
+        && (!request.resource.data.keys().hasAny(['calculator'])
+          || request.resource.data.calculator is map)
         && request.resource.data.updated is string
         && request.resource.data.updatedBy == request.auth.uid
         && request.resource.data.updatedAt is timestamp;

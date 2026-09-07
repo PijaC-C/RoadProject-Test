@@ -180,7 +180,7 @@
     const RECORDS_COLLECTION='bridge_scope_records_v3';
     const CUSTOM_COLLECTION='bridge_scope_custom_bridges_v3';
     const readStorage=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
-    let R=readStorage(K,{}), customBridges=readStorage(CK,[]), B=[...D,...customBridges], sel=null, calcBridgeCode=null;
+    let R=readStorage(K,{}), customBridges=readStorage(CK,[]), B=[...D,...customBridges], sel=null, calcBridgeCode=null, calcFrameLoaded=false;
     let authUser=null, recordsUnsub=null, customUnsub=null, migrationStarted=false, customMigrationStarted=false;
     const $=s=>document.querySelector(s);
     const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -293,9 +293,22 @@
     }
 
     function sum(r){return W.reduce((s,i)=>{let v=r.items?.[i.id];return s+(v?.sel?(v.qty||0)*i.price:0)},0)}
-    async function save(){
+    function calculatorFrameReady(){
+      const frame=$('#calcFrame');
+      return !!(calcFrameLoaded&&sel&&calcBridgeCode===sel&&frame?.contentWindow&&frame.src&&frame.src!=='about:blank');
+    }
+    async function save({fromCalculator=false}={}){
       if(!sel)return;
       R[sel]=collectRecord(true);localStorage.setItem(K,JSON.stringify(R));marks.get(sel)?.setIcon(icon(sel));render();
+      if(!fromCalculator&&calculatorFrameReady()){
+        if(!authUser){toast('บันทึกในเครื่องแล้ว กำลังอ่านค่าจากเครื่องคำนวณ…');}
+        else{
+          try{await setDoc(doc(db,RECORDS_COLLECTION,docId(sel)),recordPayload(sel,R[sel]));toast('บันทึกข้อมูลแล้ว กำลังอ่านค่าจากเครื่องคำนวณ…')}
+          catch(err){console.error('Firestore base save failed',err);toast('บันทึกข้อมูลในเครื่องแล้ว แต่ซิงก์ไม่สำเร็จ')}
+        }
+        $('#calcFrame').contentWindow.postMessage({type:'bridge-paint-request-save',bridgeCode:sel},location.origin);
+        return;
+      }
       if(!authUser){toast('บันทึกในเครื่องแล้ว รอฐานข้อมูล');return}
       try{await setDoc(doc(db,RECORDS_COLLECTION,docId(sel)),recordPayload(sel,R[sel]));toast('บันทึกและซิงก์แล้ว')}
       catch(err){console.error('Firestore save failed',err);toast('บันทึกในเครื่องแล้ว แต่ซิงก์ไม่สำเร็จ')}
@@ -334,7 +347,8 @@
     function loadCalculatorForBridge(code){
       let frame=$('#calcFrame');
       calcBridgeCode=code;
-      frame.onload=()=>frame.contentWindow?.postMessage({type:'bridge-paint-load-state',bridgeCode:code,state:R[code]?.calculator||null},location.origin);
+      calcFrameLoaded=false;
+      frame.onload=()=>{calcFrameLoaded=true;frame.contentWindow?.postMessage({type:'bridge-paint-load-state',bridgeCode:code,state:R[code]?.calculator||null},location.origin)};
       frame.src='bridge-paint-calculator.html?bridge='+encodeURIComponent(code);
     }
     async function applyCalculatorResult(data){
@@ -361,7 +375,7 @@
       localStorage.setItem(K,JSON.stringify(R));
       marks.get(code)?.setIcon(icon(code));
       render();
-      await save();
+      await save({fromCalculator:true});
     }
 
     function nextCode(){let n=1,code;do{code='NEW'+String(n++).padStart(2,'0')}while(B.some(b=>b.code===code));return code}
@@ -383,7 +397,7 @@
     $('#q').oninput=render;
     $('#district').onchange=render;
     $('#menu').onclick=()=>$('#side').classList.toggle('open');
-    $('#close').onclick=()=>{$('#panel').classList.remove('open');$('#calcFrame').src='about:blank';calcBridgeCode=null};
+    $('#close').onclick=()=>{$('#panel').classList.remove('open');calcFrameLoaded=false;$('#calcFrame').src='about:blank';calcBridgeCode=null};
     $('#fit').onclick=()=>map.fitBounds(L.latLngBounds(B.map(b=>[b.lat,b.lng])),{padding:[35,35]});
     $('#add').onclick=()=>$('#addDialog').showModal();
     $('#cancelAdd').onclick=()=>$('#addDialog').close();

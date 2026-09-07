@@ -21,8 +21,8 @@
     .head{padding:10px;border-bottom:1px solid #d8e2ea}
     .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
     .m{padding:7px;text-align:center;background:#f3f6f9;border-radius:8px}.m b{display:block;color:#123f67;font-size:18px}.m span{font-size:10px;color:#64748b}
-    .filter{display:grid;grid-template-columns:1fr 105px;gap:6px;margin-top:8px}.filter input,.filter select{width:100%;padding:8px;border:1px solid #d8e2ea;border-radius:8px}
-    .list{overflow:auto;padding:8px}.card{padding:9px;border:1px solid #d8e2ea;border-radius:10px;margin-bottom:7px;cursor:pointer}
+    .filter{display:grid;grid-template-columns:1fr 105px;gap:6px;margin-top:8px}.filter input,.filter select,.project-filter{width:100%;padding:8px;border:1px solid #d8e2ea;border-radius:8px}.project-filter{margin-top:6px;background:#fff}
+    .list{overflow:auto;padding:8px}.project-group{margin-bottom:11px}.project-group-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:5px 2px 6px;color:#123f67;font-size:12px;line-height:1.35}.project-group-title span{flex:0 0 auto;color:#64748b;font-size:10px;font-weight:400}.card{padding:9px;border:1px solid #d8e2ea;border-radius:10px;margin-bottom:7px;cursor:pointer}
     .card:hover,.card.on{border-color:#5b9dd3;box-shadow:0 4px 14px #123f671a}.card b{color:#123f67;font-size:12px}.card h3{font-size:13px;line-height:1.4;margin:4px 0}.card p{font-size:11px;color:#64748b;margin:0}
     .mapwrap{position:relative;min-height:0}#map{height:100%;background:#dce8ee}
     .tools{position:absolute;z-index:800;left:12px;top:12px;display:flex;gap:6px}.tools button{background:#fff;color:#123f67;box-shadow:0 4px 14px #123f6722}
@@ -57,6 +57,7 @@
             <div class="m"><b id="mi">0</b><span>รายการงาน</span></div>
           </div>
           <div class="filter"><input id="q" placeholder="ค้นหาชื่อ/รหัส"><select id="district"><option value="">ทุกเขต</option></select></div>
+          <select id="project" class="project-filter"><option value="">ทุกโครงการ</option></select>
         </div>
         <div class="list" id="list"></div>
       </aside>
@@ -159,6 +160,52 @@
       ['BR568','สะพานคนเดินข้าม ซอยประชาวัฒนา (+20.00 m.) ถ.หลวงแพ่ง','ลาดกระบัง','หลวงแพ่ง',13.70942233,100.8243609,'จุดรองรับแตกร้าว ผิวพื้น ชำรุด'],
       ['BR741','สะพานคนเดินข้าม ซอยเลียบวารี 51 (+20m.) ถ. เลียบวารี','หนองจอก','เลียบวารี',13.8532707200078,100.823779688153,'สีสะพาน สีพื้น ท่อระบายน้ำ ชำรุด ไฟส่องสว่างหาย']
     ].map(x => ({code:x[0],name:x[1],district:x[2],road:x[3],lat:x[4],lng:x[5],issue:x[6]}));
+
+    // จัดกลุ่มตามชื่อโครงการจากไฟล์ "สำรวจสะพานลอยทาง 1 จัดชื่อโครงการ.xlsx"
+    const PROJECT_BY_CODE = Object.freeze({
+      BR396:'งานจัดซ่อมสะพานคนเดินข้าม บริเวณมหาวิทยาลัยรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR400:'งานจัดซ่อมสะพานคนเดินข้าม บริเวณมหาวิทยาลัยรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR402:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR404:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR425:'งานจัดซ่อมสะพานคนเดินข้าม บริเวณมหาวิทยาลัยรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR430:'งานจัดซ่อมสะพานคนเดินข้าม บริเวณมหาวิทยาลัยรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR450:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนลาดพร้าว จำนวน 3 สะพาน พื้นที่เขตบางกะปิ',
+      BR452:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนลาดพร้าว จำนวน 3 สะพาน พื้นที่เขตบางกะปิ',
+      BR045:'งานจัดซ่อมสะพานคนเดินข้าม บริเวณวัดเทวสุนทร จำนวน 1 สะพาน พื้นที่เขตจตุจักร',
+      BR061:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR073:'งานจัดซ่อมสะพานคนเดินข้าม บริเวณซอยกำแพงเพชร 6 จำนวน 1 สะพาน พื้นที่เขตดอนเมือง',
+      BR082:'งานจัดซ่อมสะพานคนเดินข้าม บริเวณซอยกำแพงเพชร 1 จำนวน 1 สะพาน พื้นที่เขตจตุจักร',
+      BR401:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR403:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR423:'งานจัดซ่อมสะพานคนเดินข้าม บริเวณมหาวิทยาลัยรามคำแหง จำนวน 5 สะพาน พื้นที่เขตบางกะปิ',
+      BR451:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนลาดพร้าว จำนวน 3 สะพาน พื้นที่เขตบางกะปิ',
+      BR682:'งานจัดซ่อมสะพานคนเดินข้าม บริเวณซอยพหลโยธิน 19/1 จำนวน 1 สะพาน พื้นที่เขตจตุจักร',
+      BR730:'งานจัดซ่อมสะพานคนเดินข้าม บนถรรศรีนครินทร์-ร่มเกล้า จำนวน 1 สะพาน พื้นที่เขตบางกะปิ',
+      BR157:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนอโศก-ดินแดง จำนวน 2 สะพาน พื้นที่เขตดินแดง',
+      BR160:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนอโศก-ดินแดง จำนวน 2 สะพาน พื้นที่เขตดินแดง',
+      BR376:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนรัชดาภิเษก จำนวน 1 สะพาน พื้นที่เขตดินแดง',
+      BR025:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนศรีนครินทร์ จำนวน 2 สะพาน พื้นที่เขตสวนหลวง',
+      BR031:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนศรีนครินทร์ จำนวน 2 สะพาน พื้นที่เขตสวนหลวง',
+      BR144:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนฉลองกรุง จำนวน 2 สะพาน พื้นที่เขตลาดกระบัง',
+      BR145:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนฉลองกรุง จำนวน 2 สะพาน พื้นที่เขตลาดกระบัง',
+      BR147:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนเฉลิมพระเกียรติร.9 จำนวน 1 สะพาน พื้นที่เขตประเวศ',
+      BR154:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนเชื่อมสัมพันธ์ จำนวน 2 สะพาน พื้นที่เขตหนองจอก',
+      BR155:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนเชื่อมสัมพันธ์ จำนวน 2 สะพาน พื้นที่เขตหนองจอก',
+      BR409:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนรามคำแหง จำนวน 1 สะพาน พื้นที่เขตสะพานสูง',
+      BR419:'งานจัดซ่อมสะพานคนเดินข้าม จำนวน 4 สะพาน พื้นที่เขตมีนบุรี',
+      BR444:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนลาดกระบัง-หลวงแพ่ง จำนวน 4 สะพาน พื้นที่เขตลาดกระบัง',
+      BR445:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนลาดกระบัง-หลวงแพ่ง จำนวน 4 สะพาน พื้นที่เขตลาดกระบัง',
+      BR495:'งานจัดซ่อมสะพานคนเดินข้าม จำนวน 4 สะพาน พื้นที่เขตมีนบุรี',
+      BR496:'งานจัดซ่อมสะพานคนเดินข้าม จำนวน 4 สะพาน พื้นที่เขตมีนบุรี',
+      BR518:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนสุขุมวิท จำนวน 2 สะพาน พื้นที่เขตพระโขนง',
+      BR538:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนสุขุมวิท จำนวน 2 สะพาน พื้นที่เขตพระโขนง',
+      BR557:'งานจัดซ่อมสะพานคนเดินข้าม จำนวน 4 สะพาน พื้นที่เขตมีนบุรี',
+      BR566:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนลาดกระบัง-หลวงแพ่ง จำนวน 4 สะพาน พื้นที่เขตลาดกระบัง',
+      BR568:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนลาดกระบัง-หลวงแพ่ง จำนวน 4 สะพาน พื้นที่เขตลาดกระบัง',
+      BR741:'งานจัดซ่อมสะพานคนเดินข้าม บนถนนเลียบวารี จำนวน 1 สะพาน พื้นที่เขตหนองจอก'
+    });
+    D.forEach(b=>{b.project=PROJECT_BY_CODE[b.code]||''});
+    console.assert(D.every(b=>b.project),'Every survey bridge must have a project name');
 
     const W = [
       ['1.1','รื้อกระเบื้องเดิมพร้อมขนย้าย','ตร.ม.',54.9],
@@ -294,10 +341,14 @@
     }
     function startDataSync(){subscribeRecords();subscribeCustomBridges()}
 
+    const projectLabel=b=>b.project||'สะพานที่เพิ่มเอง';
+
     function render(){
-      let q=$('#q').value.toLowerCase(), d=$('#district').value;
-      let visible=B.filter(b=>(!q||`${b.code} ${b.name} ${b.road}`.toLowerCase().includes(q))&&(!d||b.district===d));
-      $('#list').innerHTML=visible.map(b=>`<div class="card ${sel===b.code?'on':''}" data-c="${e(b.code)}"><b>${e(b.code)}</b><h3>${e(b.name)}</h3><p>เขต${e(b.district)} • ถนน${e(b.road)}</p></div>`).join('');
+      let q=$('#q').value.toLowerCase(), d=$('#district').value, p=$('#project').value;
+      let visible=B.filter(b=>(!q||`${b.code} ${b.name} ${b.road}`.toLowerCase().includes(q))&&(!d||b.district===d)&&(!p||projectLabel(b)===p));
+      let groups=new Map();
+      visible.forEach(b=>{let key=projectLabel(b);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(b)});
+      $('#list').innerHTML=groups.size?[...groups].map(([project,bridges])=>`<section class="project-group"><h3 class="project-group-title"><span>${e(project)}</span><span>${bridges.length} สะพาน</span></h3>${bridges.map(b=>`<div class="card ${sel===b.code?'on':''}" data-c="${e(b.code)}"><b>${e(b.code)}</b><h3>${e(b.name)}</h3><p>เขต${e(b.district)} • ถนน${e(b.road)}</p></div>`).join('')}</section>`).join(''):'<p class="hint">ไม่พบสะพานตามตัวกรอง</p>';
       document.querySelectorAll('.card').forEach(x=>x.onclick=()=>openB(x.dataset.c));
       $('#ma').textContent=B.length;
       $('#md').textContent=B.filter(b=>done(b.code)).length;
@@ -307,6 +358,9 @@
     function renderDistricts(){
       let districts=[...new Set(B.map(b=>b.district))].sort((x,y)=>x.localeCompare(y,'th'));
       $('#district').innerHTML='<option value="">ทุกเขต</option>'+districts.map(x=>`<option>${e(x)}</option>`).join('');
+      let current=$('#project').value, projects=[...new Set(B.map(projectLabel))].sort((x,y)=>x.localeCompare(y,'th'));
+      $('#project').innerHTML='<option value="">ทุกโครงการ</option>'+projects.map(x=>`<option value="${e(x)}">${e(x)}</option>`).join('');
+      if(projects.includes(current))$('#project').value=current;
     }
 
     function openB(c){
@@ -315,7 +369,7 @@
       calcBridgeCode=c;
       $('#side').classList.remove('open');
       $('#name').textContent=b.name;
-      $('#sub').textContent=`${b.code} • เขต${b.district} • ถนน${b.road}`;
+      $('#sub').textContent=`${b.code} • ${projectLabel(b)} • เขต${b.district} • ถนน${b.road}`;
       $('#navigate').disabled=false;
       $('#date').value=r.date||t();
       $('#inspector').value=r.inspector||'';
@@ -445,6 +499,7 @@
 
     $('#q').oninput=render;
     $('#district').onchange=render;
+    $('#project').onchange=render;
     $('#menu').onclick=()=>$('#side').classList.toggle('open');
     $('#close').onclick=()=>{$('#panel').classList.remove('open');calcFrameLoaded=false;$('#calcFrame').src='about:blank';calcBridgeCode=null};
     $('#fit').onclick=()=>map.fitBounds(L.latLngBounds(B.map(b=>[b.lat,b.lng])),{padding:[35,35]});

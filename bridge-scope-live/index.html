@@ -27,14 +27,14 @@
     .mapwrap{position:relative;min-height:0}#map{height:100%;background:#dce8ee}
     .tools{position:absolute;z-index:800;left:12px;top:12px;display:flex;gap:6px}.tools button{background:#fff;color:#123f67;box-shadow:0 4px 14px #123f6722}
     .pin{width:32px;height:32px;border-radius:50% 50% 50% 0;background:#123f67;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 12px #123f6755}.pin.done{background:#14845b}.pin span{display:block;transform:rotate(45deg);color:#fff;text-align:center;line-height:26px;font-size:8px;font-weight:700}
-    .panel{position:absolute;z-index:1000;right:0;top:0;bottom:0;width:min(650px,100%);background:#fff;box-shadow:-12px 0 36px #123f6733;transform:translateX(102%);transition:.2s;display:flex;flex-direction:column}.panel.open{transform:none}
+    .panel{position:absolute;z-index:1000;right:0;top:0;bottom:0;width:min(1100px,100%);background:#fff;box-shadow:-12px 0 36px #123f6733;transform:translateX(102%);transition:.2s;display:flex;flex-direction:column}.panel.open{transform:none}
     .ph{display:flex;padding:13px 15px;border-bottom:1px solid #d8e2ea}.ph div{flex:1}.ph h2{margin:0;color:#123f67;font-size:17px}.ph p{margin:3px 0 0;color:#64748b;font-size:12px}.x{width:35px;height:35px;border:1px solid #d8e2ea;background:#fff;border-radius:8px}
     .pb{flex:1;min-height:0;overflow:auto;padding:14px;-webkit-overflow-scrolling:touch}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field label{display:block;font-size:11px;color:#64748b;margin-bottom:4px}.field input,.field textarea{width:100%;padding:8px;border:1px solid #d8e2ea;border-radius:8px}
-    .issue{margin:11px 0;background:#fff8e7;border-left:4px solid #efb33c;padding:8px;font-size:12px}.works{border:1px solid #d8e2ea;border-radius:10px;overflow:auto}.row{display:grid;grid-template-columns:26px minmax(140px,1fr) 76px 62px;gap:6px;align-items:center;padding:7px;border-bottom:1px solid #d8e2ea}.row:last-child{border:0}.row.sel{background:#f2f8ff}.row .name{font-size:12px;line-height:1.35}.row input[type=number],.row input[type=text]{width:100%;padding:6px;border:1px solid #d8e2ea;border-radius:6px}.note{display:none;margin-top:5px}.row.sel .note{display:block}
-    .total{display:flex;justify-content:space-between;background:#123f67;color:#fff;border-radius:9px;padding:10px;margin-top:9px}.pf{padding:9px 13px;border-top:1px solid #d8e2ea;display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}.save{background:#123f67;color:#fff}.pdf{background:#e8f2fb;color:#123f67}.nav{background:#e7f2fb;color:#123f67}.calc{background:#e4f2f2;color:#123f67}
+    .issue{margin:11px 0;background:#fff8e7;border-left:4px solid #efb33c;padding:8px;font-size:12px}.calculator-shell{height:calc(100vh - 250px);min-height:560px;border:1px solid #d8e2ea;border-radius:10px;overflow:hidden;background:#fff}.calculator-shell iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+    .pf{padding:9px 13px;border-top:1px solid #d8e2ea;display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}.save{background:#123f67;color:#fff}.pdf{background:#e8f2fb;color:#123f67}.nav{background:#e7f2fb;color:#123f67}
     .toast{position:fixed;z-index:4000;left:50%;bottom:18px;transform:translate(-50%,12px);background:#183143;color:#fff;padding:9px 12px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
-    dialog{width:min(430px,calc(100% - 24px));border:0;border-radius:14px;padding:0;box-shadow:0 18px 60px #123f6755}dialog::backdrop{background:#10283b99}.dialog-body{padding:18px}.dialog-body h2{margin:0 0 14px;color:#123f67}.dialog-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.dialog-grid .wide{grid-column:1/-1}.dialog-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}.hint{font-size:11px;color:#64748b;margin:8px 0 0}.calc-dialog{width:min(1280px,calc(100% - 20px));height:min(92vh,900px);max-width:none;padding:0}.calc-dialog-body{height:100%;display:flex;flex-direction:column}.calc-dialog-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #d8e2ea}.calc-dialog-head div{flex:1}.calc-dialog-head h2{margin:0;color:#123f67;font-size:16px}.calc-dialog-head p{margin:2px 0 0;color:#64748b;font-size:11px}.calc-dialog-head .x{flex:0 0 auto}#calcFrame{border:0;flex:1;width:100%;min-height:0}
-    @media(max-width:720px){.top{padding:0 8px;gap:6px}.top b{font-size:15px}.top small,.txt,.sync{display:none}.top .a{gap:4px}.main{display:block}.mapwrap{height:calc(100vh - 62px);height:calc(100dvh - 62px)}.side{position:absolute;z-index:900;left:0;top:62px;bottom:0;width:min(88vw,330px);transform:translateX(-103%);transition:.2s}.side.open{transform:none}.grid,.dialog-grid{grid-template-columns:1fr}.dialog-grid .wide{grid-column:auto}.calc-dialog{width:100%;height:100%;max-height:100%;margin:0;border-radius:0}.calc-dialog-head{padding:8px}}
+    dialog{width:min(430px,calc(100% - 24px));border:0;border-radius:14px;padding:0;box-shadow:0 18px 60px #123f6755}dialog::backdrop{background:#10283b99}.dialog-body{padding:18px}.dialog-body h2{margin:0 0 14px;color:#123f67}.dialog-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.dialog-grid .wide{grid-column:1/-1}.dialog-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}.hint{font-size:11px;color:#64748b;margin:8px 0 0}
+    @media(max-width:720px){.top{padding:0 8px;gap:6px}.top b{font-size:15px}.top small,.txt,.sync{display:none}.top .a{gap:4px}.main{display:block}.mapwrap{height:calc(100vh - 62px);height:calc(100dvh - 62px)}.side{position:absolute;z-index:900;left:0;top:62px;bottom:0;width:min(88vw,330px);transform:translateX(-103%);transition:.2s}.side.open{transform:none}.grid,.dialog-grid{grid-template-columns:1fr}.dialog-grid .wide{grid-column:auto}.calculator-shell{height:calc(100dvh - 300px);min-height:520px}}
   </style>
 </head>
 <body>
@@ -70,12 +70,11 @@
               <div class="field"><label for="date">วันที่สำรวจ</label><input type="date" id="date"></div>
               <div class="field"><label for="inspector">ผู้สำรวจ</label><input id="inspector"></div>
             </div>
-            <div class="issue" id="issue">-</div>
-            <div class="works" id="works"></div>
-            <div class="total"><span>รวมประมาณการ</span><b id="total">0.00 บาท</b></div>
             <div class="field" style="margin-top:10px"><label for="overall">หมายเหตุเพิ่มเติม</label><textarea id="overall" rows="3"></textarea></div>
+            <div class="issue" id="issue">-</div>
+            <div class="calculator-shell"><iframe id="calcFrame" title="เครื่องคำนวณพื้นที่ผิวสะพาน"></iframe></div>
           </div>
-          <div class="pf"><button class="btn calc" id="openCalc" type="button">คำนวณพื้นที่ผิว</button><button class="btn nav" id="navigate" disabled>นำทาง</button><button class="btn pdf" id="onePdf">สรุป PDF</button><button class="btn save" id="save">บันทึก</button></div>
+          <div class="pf"><button class="btn nav" id="navigate" disabled>นำทาง</button><button class="btn pdf" id="onePdf">สรุป PDF</button><button class="btn save" id="save">บันทึก</button></div>
         </aside>
       </section>
     </main>
@@ -94,12 +93,6 @@
       <p class="hint">กรอกพิกัดทั้งสองช่อง หรือเลือก “คลิกบนแผนที่” แล้วแตะตำแหน่งที่ต้องการ</p>
       <div class="dialog-actions"><button class="btn" type="button" id="cancelAdd">ยกเลิก</button><button class="btn pdf" type="button" id="pickMap">คลิกบนแผนที่</button><button class="btn save" type="submit">เพิ่มจากพิกัด</button></div>
     </form>
-  </dialog>
-  <dialog id="calcDialog" class="calc-dialog" aria-label="เครื่องคำนวณพื้นที่ผิวสะพาน">
-    <div class="calc-dialog-body">
-      <div class="calc-dialog-head"><div><h2>คำนวณพื้นที่ผิวสะพาน</h2><p id="calcBridgeLabel"></p></div><button class="x" id="closeCalc" type="button" aria-label="ปิดเครื่องคำนวณ">✕</button></div>
-      <iframe id="calcFrame" title="เครื่องคำนวณพื้นที่ผิวสะพาน"></iframe>
-    </div>
   </dialog>
   <div class="toast" id="toast"></div>
 
@@ -144,9 +137,7 @@
       ['BR730','สะพานคนเดินข้าม ซอยประชาร่วมใจ (+444m.) ถ. ศรีนครินทร์-ร่มเกล้า','บางกะปิ','ศรีนครินทร์-ร่มเกล้า',13.7503928,100.6741175,'สีสะพาน สีพื้น สีจราจร ท่อน้ำ ชำรุด'],
       ['BR157','สะพานคนเดินข้าม ซอยขวัญพัฒนา (+14.52 m) ถ.ดินแดง','ดินแดง','ดินแดง',13.75693611,100.5580947,'สีสะพาน ผิวพื้น ชำรุด'],
       ['BR160','สะพานคนเดินข้าม โรงเรียนแม่พระฟาติมา (+14.55 m) ถ.ดินแดง','ดินแดง','ดินแดง',13.76010149,100.5557055,'สีสะพาน ผิวพื้น ชำรุด'],
-      ['BR374','สะพานคนเดินข้าม ซอยรัชดาภิเษก 7 (+10.00 m.) ถ.รัชดาภิเษก','ห้วยขวาง','รัชดาภิเษก',13.77279643,100.5733967,'สีสะพาน ผิวพื้น ชำรุด'],
       ['BR376','สะพานคนเดินข้าม ซอยโรหิตสุข (+30.00 m.) ถ.รัชดาภิเษก','ดินแดง','รัชดาภิเษก',13.78191406,100.5738044,'สีสะพาน ผิวพื้น ชำรุด'],
-      ['BR377','สะพานคนเดินข้าม ซอยสุขร่มกัน (+20.00 m.) ถ.รัชดาภิเษก','ห้วยขวาง','รัชดาภิเษก',13.7750153,100.5734932,'สีสะพาน ผิวพื้น ชำรุด'],
       ['BR025','สะพานคนข้าม ศรีนครินทร์ ซอย 24 (+6.44 m) ถ.ศรีนครินทร์','สวนหลวง','ศรีนครินทร์',13.721097,100.642151,'โคนเสา ใต้ท้องบันได แตกร่อนเห็นเหล็ก'],
       ['BR031','สะพานคนเดินข้าม ซ.ศรีนครินทร์ 37 ถ.ศรีนครินทร์','สวนหลวง','ศรีนครินทร์',13.70537615,100.6454703,'โคนเสาแตกร่อน สีสะพานชุรุด'],
       ['BR144','สะพานคนเดินข้าม ซอยฉลองกรุง 33 (+19.53 m) ถ.ฉลองกรุง','ลาดกระบัง','ฉลองกรุง',13.75679861,100.7987208,'จุดรองรับแตกร้าว คานแตกร้าวเห็นเหล็ก'],
@@ -197,7 +188,7 @@
     const docId=s=>String(s).replace(/[^A-Za-z0-9_-]/g,'_');
     let map, marks=new Map();
 
-    console.assert(D.length===42,'Unsurveyed survey dataset must contain 42 locations');
+    console.assert(D.length===40,'Unsurveyed survey dataset must contain 40 locations');
 
     function toast(x){$('#toast').textContent=x;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),1600)}
     function setSyncStatus(x){$('#syncStatus').textContent=x;$('#syncStatus').title=x}
@@ -264,7 +255,7 @@
       document.querySelectorAll('.card').forEach(x=>x.onclick=()=>openB(x.dataset.c));
       $('#ma').textContent=B.length;
       $('#md').textContent=B.filter(b=>done(b.code)).length;
-      $('#mi').textContent=Object.values(R).reduce((s,r)=>s+Object.values(r.items||{}).filter(x=>x.sel).length,0);
+      $('#mi').textContent=B.reduce((s,b)=>s+Object.values(R[b.code]?.items||{}).filter(x=>x.sel).length,0);
     }
 
     function renderDistricts(){
@@ -276,6 +267,7 @@
       let b=B.find(x=>x.code===c), r=rec(c);
       sel=c;
       calcBridgeCode=c;
+      $('#side').classList.remove('open');
       $('#name').textContent=b.name;
       $('#sub').textContent=`${b.code} • เขต${b.district} • ถนน${b.road}`;
       $('#navigate').disabled=false;
@@ -283,24 +275,16 @@
       $('#inspector').value=r.inspector||'';
       $('#overall').value=r.overall||'';
       $('#issue').textContent=b.issue||'สภาพชำรุดตามบัญชีสำรวจ';
-      $('#works').innerHTML=W.map(i=>{
-        let v=r.items[i.id]||{};
-        return `<div class="row ${v.sel?'sel':''}" data-i="${i.id}"><input type="checkbox" aria-label="เลือกงาน ${i.id}" ${v.sel?'checked':''}><div class="name"><b>${i.id}</b> ${e(i.name)}<div class="note"><input type="text" value="${e(v.note||'')}" placeholder="หมายเหตุ" aria-label="หมายเหตุงาน ${i.id}"></div></div><input class="qty" aria-label="ปริมาณงาน ${i.id}" type="number" min="0" step="0.01" value="${v.qty??''}" ${v.sel?'':'disabled'}><input class="unit" aria-label="หน่วยงาน ${i.id}" type="text" value="${e(v.unit||i.unit)}" ${v.sel?'':'disabled'}></div>`;
-      }).join('');
-      document.querySelectorAll('.row').forEach(x=>{
-        let checkbox=x.querySelector('input[type=checkbox]');
-        checkbox.onchange=()=>{x.classList.toggle('sel',checkbox.checked);x.querySelector('.qty').disabled=x.querySelector('.unit').disabled=!checkbox.checked;calc()};
-        x.querySelectorAll('input').forEach(y=>y.oninput=calc);
-      });
-      calc();
+      loadCalculatorForBridge(c);
       $('#panel').classList.add('open');
       map.setView([b.lat,b.lng],15);
       render();
     }
 
     function collectRecord(mark=false){
-      let old=R[sel]||{}, items={};
-      document.querySelectorAll('.row').forEach(x=>{
+      let old=R[sel]||{}, items={...old.items};
+      let rows=document.querySelectorAll('.row');
+      if(rows.length)rows.forEach(x=>{
         let item=W.find(y=>y.id===x.dataset.i);
         items[item.id]={sel:x.querySelector('input[type=checkbox]').checked,qty:Number(x.querySelector('.qty').value)||0,unit:x.querySelector('.unit').value||item.unit,note:x.querySelector('.note input').value};
       });
@@ -308,7 +292,6 @@
     }
 
     function sum(r){return W.reduce((s,i)=>{let v=r.items?.[i.id];return s+(v?.sel?(v.qty||0)*i.price:0)},0)}
-    function calc(){$('#total').textContent=m(sum(collectRecord()))+' บาท'}
     async function save(){
       if(!sel)return;
       R[sel]=collectRecord(true);localStorage.setItem(K,JSON.stringify(R));marks.get(sel)?.setIcon(icon(sel));render();
@@ -337,22 +320,13 @@
       report.focus();
     }
 
-    function closeCalculator(){
-      let dialog=$('#calcDialog');
-      if(dialog?.open)dialog.close();
-      $('#calcFrame').src='about:blank';
-      calcBridgeCode=null;
+    function loadCalculatorForBridge(code){
+      let frame=$('#calcFrame');
+      calcBridgeCode=code;
+      frame.onload=()=>frame.contentWindow?.postMessage({type:'bridge-paint-load-state',bridgeCode:code,state:R[code]?.calculator||null},location.origin);
+      frame.src='bridge-paint-calculator.html?bridge='+encodeURIComponent(code);
     }
-    function openCalculator(){
-      if(!sel)return;
-      let b=B.find(x=>x.code===sel), frame=$('#calcFrame');
-      calcBridgeCode=sel;
-      $('#calcBridgeLabel').textContent=b?`${b.code} • ${b.name}`:sel;
-      frame.onload=()=>frame.contentWindow?.postMessage({type:'bridge-paint-load-state',bridgeCode:sel,state:R[sel]?.calculator||null},location.origin);
-      frame.src='bridge-paint-calculator.html?bridge='+encodeURIComponent(sel);
-      $('#calcDialog').showModal();
-    }
-    function applyCalculatorResult(data){
+    async function applyCalculatorResult(data){
       let code=data.bridgeCode;
       if(!code||code!==sel)return;
       let r=collectRecord();
@@ -373,9 +347,9 @@
       setCalcItem('1.4',crack?.enabled?crack:null,'ตร.ม.');
       R[code]=r;
       localStorage.setItem(K,JSON.stringify(R));
-      openB(code);
-      toast('รับผลคำนวณแล้ว กด “บันทึก” เพื่อซิงก์ฐานข้อมูล');
-      closeCalculator();
+      marks.get(code)?.setIcon(icon(code));
+      render();
+      await save();
     }
 
     function nextCode(){let n=1,code;do{code='NEW'+String(n++).padStart(2,'0')}while(B.some(b=>b.code===code));return code}
@@ -397,9 +371,7 @@
     $('#q').oninput=render;
     $('#district').onchange=render;
     $('#menu').onclick=()=>$('#side').classList.toggle('open');
-    $('#close').onclick=()=>$('#panel').classList.remove('open');
-    $('#openCalc').onclick=openCalculator;
-    $('#closeCalc').onclick=closeCalculator;
+    $('#close').onclick=()=>{$('#panel').classList.remove('open');$('#calcFrame').src='about:blank';calcBridgeCode=null};
     $('#fit').onclick=()=>map.fitBounds(L.latLngBounds(B.map(b=>[b.lat,b.lng])),{padding:[35,35]});
     $('#add').onclick=()=>$('#addDialog').showModal();
     $('#cancelAdd').onclick=()=>$('#addDialog').close();
@@ -424,7 +396,7 @@
     window.addEventListener('message',event=>{
       if(event.origin!==location.origin||event.source!==$('#calcFrame').contentWindow)return;
       let data=event.data||{};
-      if(data.type==='bridge-paint-calculation'&&data.bridgeCode===calcBridgeCode)applyCalculatorResult(data);
+      if(data.type==='bridge-paint-calculation'&&data.bridgeCode===calcBridgeCode)void applyCalculatorResult(data);
     });
     renderDistricts();render();
     onAuthStateChanged(auth,user=>{

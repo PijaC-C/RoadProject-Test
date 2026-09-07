@@ -12,7 +12,7 @@
 <style>#views .view-card:first-child svg{height:250px}#views .view-card:nth-child(2) svg{height:360px;min-height:300px}@media(max-width:700px){#views .view-card:first-child svg{height:250px}#views .view-card:nth-child(2) svg{height:360px;min-width:1120px}}.type-option svg{height:130px}.view-card:last-child svg{height:auto;min-height:300px}.drawing svg{height:330px}.override-row label small{display:block}@media(max-width:700px){.view-card:last-child svg{height:auto;min-width:900px}.type-options{grid-template-columns:1fr}.type-option svg{height:155px}} </style>
 <style>.survey-diagram{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px;padding:12px}.survey-section-card h3{margin:0 0 4px;text-align:center}.survey-diagram svg{height:auto;max-height:300px}.survey-diagram text{font:12px "Segoe UI",Tahoma,sans-serif;fill:var(--ink)}</style></head>
 <body>
-<header><div class="brand"><svg viewBox="0 0 80 48" aria-hidden="true"><path d="M4 35h72M10 34V21m60 13V21M10 22c14-14 46-14 60 0M20 19v16m20-25v25m20-16v16"/></svg><span>Bridge Surface</span></div><div class="actions"><span id="bridgeContext" class="survey-source"></span><button id="applyMap" class="primary" type="button">ส่งผลกลับแผนที่</button><button id="save">Save HTML</button><button id="csv">Export CSV</button></div></header>
+<header><div class="brand"><svg viewBox="0 0 80 48" aria-hidden="true"><path d="M4 35h72M10 34V21m60 13V21M10 22c14-14 46-14 60 0M20 19v16m20-25v25m20-16v16"/></svg><span>Bridge Surface</span></div><div class="actions"><span id="bridgeContext" class="survey-source"></span><button id="applyMap" class="primary" type="button">บันทึกผลเข้าระบบ</button><button id="save">Save HTML</button><button id="csv">Export CSV</button></div></header>
 <main>
 <h1>คำนวณพื้นที่ผิวสะพานคนเดินข้าม</h1>
 <p class="subtitle">กำหนดจำนวนช่วง เสา และบันได แล้วแก้ไขมิติของแต่ละชิ้นส่วนตามแบบสำรวจ</p>
@@ -270,7 +270,7 @@ function sendToMap(){
  if(!target||!bridgeQuery){toast('เปิดเครื่องคำนวณจากหน้าแผนที่ก่อน');return;}
  const calculatorState=JSON.parse(JSON.stringify(state));
  target.postMessage({type:'bridge-paint-calculation',bridgeCode:bridgeQuery,calculatorState,quantities:t.quantities},location.origin);
- toast('ส่งผลคำนวณกลับหน้าแผนที่แล้ว');
+ toast('ส่งผลคำนวณกลับระบบแล้ว');
 }
 window.addEventListener('message',event=>{
  if(event.origin!==location.origin)return;

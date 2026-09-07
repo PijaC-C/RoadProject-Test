@@ -1,6 +1,8 @@
 /*
  * รายการเนื้องานและราคาต่อหน่วยจาก
- * "ราคางานจัดซ่อมสะพานคนเดินข้ามถนน ประมาณก.pdf" (แผ่นที่ 1-2)
+ * ราคาพื้นฐานจาก "ราคางานจัดซ่อมสะพานคนเดินข้ามถนน ประมาณก.pdf" (แผ่นที่ 1-2)
+ * และราคาต่อหน่วยที่มีรายการตรงกันอัปเดตจาก
+ * "สะพานลอยคนชุดที่ 2 6 เขต 27-8-2569.xlsx" แท็บ "ปร.4 ชุดที่2 7-9-69"
  *
  * ปริมาณใน PDF เป็นยอดรวมของ 4 สะพาน ไม่ใช่ปริมาณรายรหัสสะพาน
  * จึงเก็บเฉพาะรายการ/หน่วย/ราคาต่อหน่วยไว้เป็นฐานให้ผู้สำรวจเลือกและกรอก
@@ -8,12 +10,12 @@
  */
 (function (root) {
   const catalog = [
-    { id: 'pdf-1.1.1', code: '1.1.1', name: 'เคลือบทับหน้ากันลื่นพื้นสะพานและบันไดด้วยวัสดุ Polyurethane', unit: 'ตร.ม.', rate: 600, condition: 'all', auto: 'puTotal' },
-    { id: 'pdf-1.1.2', code: '1.1.2', name: 'งานซ่อมรอยแตกร้าวคอนกรีตโครงสร้างด้วย High Strength Mortar', unit: 'ตร.ม.', rate: 4300, condition: 'concrete', auto: null },
-    { id: 'pdf-1.1.3', code: '1.1.3', name: 'ฉาบพื้นผิวสะพานด้วย High Strength Mortar', unit: 'ตร.ม.', rate: 1300, condition: 'concrete', auto: 'mortar' },
-    { id: 'pdf-1.1.4', code: '1.1.4', name: 'ทาสีสะพานส่วนที่เป็นคอนกรีต', unit: 'ตร.ม.', rate: 100, condition: 'concrete', auto: null },
-    { id: 'pdf-1.1.5', code: '1.1.5', name: 'ตีเส้นแบ่งช่องทางเดินบนสะพานและบันได', unit: 'ตร.ม.', rate: 120, condition: 'all', auto: 'marking' },
-    { id: 'pdf-1.1.6.1', code: '1.1.6.1', name: 'ปรับปรุงซ่อมแซมท่อน้ำทิ้ง PVC ขนาด 4 นิ้ว', unit: 'ม.', rate: 300, condition: 'all', auto: null },
+    { id: 'pdf-1.1.1', code: '1.1.1', name: 'เคลือบทับหน้ากันลื่นพื้นสะพานและบันไดด้วยวัสดุ Polyurethane', unit: 'ตร.ม.', rate: 570.75, condition: 'all', auto: 'puTotal' },
+    { id: 'pdf-1.1.2', code: '1.1.2', name: 'งานซ่อมรอยแตกร้าวคอนกรีตโครงสร้างด้วย High Strength Mortar', unit: 'ตร.ม.', rate: 4224.71, condition: 'concrete', auto: null },
+    { id: 'pdf-1.1.3', code: '1.1.3', name: 'ฉาบพื้นผิวสะพานด้วย High Strength Mortar', unit: 'ตร.ม.', rate: 1238.6, condition: 'concrete', auto: 'mortar' },
+    { id: 'pdf-1.1.4', code: '1.1.4', name: 'ทาสีสะพานส่วนที่เป็นคอนกรีต', unit: 'ตร.ม.', rate: 92.02, condition: 'concrete', auto: null },
+    { id: 'pdf-1.1.5', code: '1.1.5', name: 'ตีเส้นแบ่งช่องทางเดินบนสะพานและบันได', unit: 'ตร.ม.', rate: 95.5, condition: 'all', auto: 'marking' },
+    { id: 'pdf-1.1.6.1', code: '1.1.6.1', name: 'ปรับปรุงซ่อมแซมท่อน้ำทิ้ง PVC ขนาด 4 นิ้ว', unit: 'ม.', rate: 860, condition: 'all', auto: null },
     { id: 'pdf-1.1.6.2', code: '1.1.6.2', name: 'ตะแกรงรังผึ้งสแตนเลส ขนาด 4 นิ้ว', unit: 'ชุด', rate: 50, condition: 'all', auto: null },
     { id: 'pdf-1.1.7', code: '1.1.7', name: 'งานขูดลอกสีเดิม', unit: 'ตร.ม.', rate: 10, condition: 'steel', auto: null },
     { id: 'pdf-1.1.8', code: '1.1.8', name: 'งานทาสีน้ำมันกันสนิมเหล็ก (รองพื้นกันสนิม+สีน้ำมัน 2 เที่ยว)', unit: 'ตร.ม.', rate: 95, condition: 'steel', auto: null },

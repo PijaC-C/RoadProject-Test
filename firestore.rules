@@ -249,7 +249,22 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Fresh namespace for the current unsurveyed bridge set. Keep the prior
+    // bridge_scope_records collection intact so older survey records are not
+    // mixed into this map or deleted during dataset replacement.
+    match /bridge_scope_records_v3/{bridgeId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && isSafeBridgeRecord();
+      allow delete: if false;
+    }
+
     match /bridge_scope_custom_bridges/{bridgeId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && isSafeCustomBridge();
+      allow delete: if false;
+    }
+
+    match /bridge_scope_custom_bridges_v3/{bridgeId} {
       allow read: if signedIn();
       allow create, update: if signedIn() && isSafeCustomBridge();
       allow delete: if false;

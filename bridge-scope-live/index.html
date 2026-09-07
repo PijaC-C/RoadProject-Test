@@ -200,26 +200,27 @@
     function marker(b){let z=L.marker([b.lat,b.lng],{icon:icon(b.code)}).addTo(map).bindTooltip(`${e(b.code)} • ${e(b.name)}`);z.on('click',()=>openB(b.code));marks.set(b.code,z)}
 
     function recordPayload(code,record){
-      return {bridgeCode:code,date:record.date||t(),inspector:String(record.inspector||''),overall:String(record.overall||''),items:record.items||{},calculator:record.calculator||{},workQuantityResetVersion:Number(record.workQuantityResetVersion)||0,updated:record.updated||new Date().toISOString(),updatedBy:authUser.uid,updatedAt:serverTimestamp()};
+      const calculator=record.calculator&&typeof record.calculator==='object'&&!Array.isArray(record.calculator)?record.calculator:{};
+      const persistedCalculator=Number(record.workQuantityResetVersion)===QUANTITY_RESET_VERSION?{...calculator,quantityResetVersion:QUANTITY_RESET_VERSION}:calculator;
+      return {bridgeCode:code,date:record.date||t(),inspector:String(record.inspector||''),overall:String(record.overall||''),items:record.items||{},calculator:persistedCalculator,updated:record.updated||new Date().toISOString(),updatedBy:authUser.uid,updatedAt:serverTimestamp()};
     }
     function normaliseRecord(data){
-      return {date:data.date||t(),inspector:data.inspector||'',overall:data.overall||'',items:data.items||{},calculator:data.calculator||null,workQuantityResetVersion:Number(data.workQuantityResetVersion)||0,updated:data.updated||''};
+      const calculator=data.calculator&&typeof data.calculator==='object'&&!Array.isArray(data.calculator)?data.calculator:null;
+      return {date:data.date||t(),inspector:data.inspector||'',overall:data.overall||'',items:data.items||{},calculator,workQuantityResetVersion:Number(calculator?.quantityResetVersion)||0,updated:data.updated||''};
     }
     function resetSavedQuantityRecord(record){
       const next={...record,items:{}};
       Object.entries(record.items||{}).forEach(([id,item])=>{const old=item&&typeof item==='object'&&!Array.isArray(item)?item:{};next.items[id]={...old,sel:false,qty:0}});
-      let calc=record.calculator&&typeof record.calculator==='object'&&!Array.isArray(record.calculator)?JSON.parse(JSON.stringify(record.calculator)):null;
-      if(calc){
-        calc.crackRepair=0;
-        const oldOverrides=calc.overrides&&typeof calc.overrides==='object'&&!Array.isArray(calc.overrides)?calc.overrides:{};
-        calc.overrides={...oldOverrides};
-        ['puDeck','puStair','mortar','marking','crack'].forEach(k=>{const old=oldOverrides[k]&&typeof oldOverrides[k]==='object'&&!Array.isArray(oldOverrides[k])?oldOverrides[k]:{};calc.overrides[k]={...old,enabled:false,value:0}});
-        const oldScope=calc.workScope&&typeof calc.workScope==='object'&&!Array.isArray(calc.workScope)?calc.workScope:{};
-        calc.workScope={...oldScope};
-        (Array.isArray(window.BRIDGE_WORK_CATALOG)?window.BRIDGE_WORK_CATALOG:[]).forEach(item=>{const old=oldScope[item.id]&&typeof oldScope[item.id]==='object'&&!Array.isArray(oldScope[item.id])?oldScope[item.id]:{};calc.workScope[item.id]={...old,enabled:false,quantity:0,source:''}});
-        calc.workItems=[];
-        calc.quantityResetVersion=QUANTITY_RESET_VERSION;
-      }
+      let calc=record.calculator&&typeof record.calculator==='object'&&!Array.isArray(record.calculator)?JSON.parse(JSON.stringify(record.calculator)):{};
+      calc.crackRepair=0;
+      const oldOverrides=calc.overrides&&typeof calc.overrides==='object'&&!Array.isArray(calc.overrides)?calc.overrides:{};
+      calc.overrides={...oldOverrides};
+      ['puDeck','puStair','mortar','marking','crack'].forEach(k=>{const old=oldOverrides[k]&&typeof oldOverrides[k]==='object'&&!Array.isArray(oldOverrides[k])?oldOverrides[k]:{};calc.overrides[k]={...old,enabled:false,value:0}});
+      const oldScope=calc.workScope&&typeof calc.workScope==='object'&&!Array.isArray(calc.workScope)?calc.workScope:{};
+      calc.workScope={...oldScope};
+      (Array.isArray(window.BRIDGE_WORK_CATALOG)?window.BRIDGE_WORK_CATALOG:[]).forEach(item=>{const old=oldScope[item.id]&&typeof oldScope[item.id]==='object'&&!Array.isArray(oldScope[item.id])?oldScope[item.id]:{};calc.workScope[item.id]={...old,enabled:false,quantity:0,source:''}});
+      calc.workItems=[];
+      calc.quantityResetVersion=QUANTITY_RESET_VERSION;
       next.calculator=calc;
       next.workQuantityResetVersion=QUANTITY_RESET_VERSION;
       return next;
@@ -229,12 +230,12 @@
       if(quantityResetStarted)return false;
       quantityResetStarted=true;
       const entries=[];
-      snap.forEach(docSnap=>{const data=docSnap.data();if(data.bridgeCode&&Number(data.workQuantityResetVersion)!==QUANTITY_RESET_VERSION)entries.push({code:data.bridgeCode,data})});
+      snap.forEach(docSnap=>{const data=docSnap.data(),record=normaliseRecord(data);if(data.bridgeCode&&record.workQuantityResetVersion!==QUANTITY_RESET_VERSION)entries.push({code:data.bridgeCode,data,record})});
       if(!entries.length)return false;
       quantityResetInFlight=true;
       setSyncStatus('กำลังตั้งปริมาณงานเป็นศูนย์…');
       try{
-        const resets=entries.map(({code,data})=>({code,record:resetSavedQuantityRecord(normaliseRecord(data))}));
+        const resets=entries.map(({code,record})=>({code,record:resetSavedQuantityRecord(record)}));
         await Promise.all(resets.map(({code,record})=>setDoc(doc(db,RECORDS_COLLECTION,docId(code)),recordPayload(code,record))));
         resets.forEach(({code,record})=>{R[code]=record});
         localStorage.setItem(K,JSON.stringify(R));

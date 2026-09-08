@@ -215,9 +215,9 @@ function overrideQuantity(key,calculated){
   const valid=validOverrideValue(e.value),value=valid?Number(e.value):null;
   return {calculated,enabled:true,value:e.value,used:value,valid};
 }
-function quantityText(q,withUnit=true){return q&&!q.valid?(q.enabled?'<span class="invalid-quantity">กรอกค่าไม่ถูกต้อง</span>':'<span class="pending-quantity">รอข้อมูลเสริม</span>'):fmt(q?.used??0)+(withUnit?' m²':'');}
-function quantityPlain(q,withUnit=true){return q&&!q.valid?(q.enabled?'กรอกค่าไม่ถูกต้อง':'รอข้อมูลเสริม') :fmt(q?.used??0)+(withUnit?' m²':'');}
-function quantityCalculatedText(q){return q?.complete===false?'รอข้อมูลเสริม (มิติ B/H บันไดยังไม่มี)':fmt(q?.calculated??0)+' m²';}
+function quantityText(q,withUnit=true){return q&&!q.valid?(q.enabled?'<span class="invalid-quantity">กรอกค่าไม่ถูกต้อง</span>':q.partial?'<span class="pending-quantity">คำนวณบางส่วน '+fmt(q.calculated??0)+(withUnit?' m²':'')+'</span>':'<span class="pending-quantity">รอข้อมูลเสริม</span>'):fmt(q?.used??0)+(withUnit?' m²':'');}
+function quantityPlain(q,withUnit=true){return q&&!q.valid?(q.enabled?'กรอกค่าไม่ถูกต้อง':q.partial?'คำนวณบางส่วน '+fmt(q.calculated??0)+(withUnit?' m²':''):'รอข้อมูลเสริม') :fmt(q?.used??0)+(withUnit?' m²':'');}
+function quantityCalculatedText(q){return q?.partial?'คำนวณบางส่วน '+fmt(q?.calculated??0)+' m² (ยังไม่รวมบันไดที่ขาด B/H)':q?.complete===false?'รอข้อมูลเสริม (มิติ B/H บันไดยังไม่มี)':fmt(q?.calculated??0)+' m²';}
 function quantityOverrideText(q){return q?.enabled?(q.valid?fmt(q.used)+' m²':'<span class="invalid-quantity">INVALID input</span>'):'— ใช้ค่าคำนวณ';}
 
 function stairTypePicker(c){
@@ -291,7 +291,7 @@ function diagram(c){return c.type==='span'&&c.shape==='surveySection'?surveySect
 
 function totals(){
   ensureEnhancedState(state);const t=calculatedTotals();t.quantities={};t.invalid=[];
-  QUANTITY_KEYS.forEach(k=>{const q=overrideQuantity(k,t.calculated[k]);q.complete=t.complete[k];if(!q.enabled&&!q.complete){q.valid=false;q.used=null;}t.quantities[k]=q;if(!q.valid)t.invalid.push(k);t[k]=q.valid?q.used:0;});
+  QUANTITY_KEYS.forEach(k=>{const q=overrideQuantity(k,t.calculated[k]);q.complete=t.complete[k];q.partial=k==='marking'&&t.markingSectionAvailable&&t.markingSectionComplete===false;if(!q.enabled&&!q.complete){if(q.partial){q.valid=true;q.used=Number(q.calculated)||0;}else{q.valid=false;q.used=null;}}t.quantities[k]=q;if(!q.valid)t.invalid.push(k);t[k]=q.valid?q.used:0;});
   t.puTotal=t.quantities.puDeck.valid&&t.quantities.puStair.valid?t.puDeck+t.puStair:0;
   t.mortarTotal=t.quantities.mortar.valid?t.mortar:0;
   t.totalUsed=t.invalid.length?null:t.puDeck+t.puStair+t.mortar+t.marking+t.crack;
@@ -367,7 +367,8 @@ function refreshEditorComputed(c){
 function renderList(){const list=$('componentList');list.innerHTML=state.components.map(c=>{const r=calc(c),label=c.type==='span'?'Span':c.type==='column'?'Column':(c.side==='left'?'Left stair':'Right stair'),top=c.type==='stair'?' · '+stairTypeMeta(c.stairType||'type1').short:'',status=r.errors.length?(c.type==='stair'?'ข้อมูลเสริม B/H':'Check inputs'):fmt(r.net)+' m² surfaces';return '<button class="component '+(c.id===activeId?'active':'')+'" data-component="'+c.id+'">'+icon(c.type)+'<span><b>'+esc(c.name||label)+'</b><small>'+esc(c.type==='stair'?stairTypeMeta(c.stairType||'type1').label:shapes[c.shape])+esc(top)+'</small><small>'+status+'</small></span></button>';}).join('');document.querySelectorAll('[data-component]').forEach(el=>el.onclick=()=>{activeId=el.dataset.component;renderAll()});}
 function updateTotalsBaseEnhanced(){
   renderViews();const t=totals();$('puDeck').textContent=quantityPlain(t.quantities.puDeck);$('puStair').textContent=quantityPlain(t.quantities.puStair);$('puTotal').textContent=t.quantities.puDeck.valid&&t.quantities.puStair.valid?fmt(t.puTotal)+' m²':'รอข้อมูลเสริม';$('mortarTotal').textContent=quantityPlain(t.quantities.mortar);$('markingArea').textContent=quantityPlain(t.quantities.marking);
-  const work=[['puDeck','PU — Deck','Deck top'],['puStair','PU — Stair','Stair treads/top + intermediate landings'],['mortar','High-strength mortar / plaster','Deck '+fmt(t.mortarDeck)+' + Column '+fmt(t.mortarColumn)+' + Stair '+fmt(t.mortarStair)+' m²'],['marking','Walkway marking',fmt(t.route)+' m × 0.15 m'],['crack','Crack repair','Manual quantity / สำรวจจริง']];
+  const markingBasis=t.markingSectionComplete?fmt(t.route)+' m × 0.15 m':fmt(t.routeSection)+' m × 0.15 m (เฉพาะช่วงที่มีข้อมูล ยังไม่รวมบันไดที่ขาด B/H)';
+  const work=[['puDeck','PU — Deck','Deck top'],['puStair','PU — Stair','Stair treads/top + intermediate landings'],['mortar','High-strength mortar / plaster','Deck '+fmt(t.mortarDeck)+' + Column '+fmt(t.mortarColumn)+' + Stair '+fmt(t.mortarStair)+' m²'],['marking','Walkway marking',markingBasis],['crack','Crack repair','Manual quantity / สำรวจจริง']];
   $('workSummary').innerHTML='<table><thead><tr><th>Work type</th><th>Calculated basis</th><th>Hard fill</th><th class="num">Used quantity</th></tr></thead><tbody>'+work.map(([k,label,basis])=>{const q=t.quantities[k];return '<tr><td>'+label+'</td><td>'+basis+'<br><span class="used-basis">Calculated '+quantityCalculatedText(q)+'</span></td><td>'+quantityOverrideText(q)+'</td><td class="num">'+quantityText(q)+'</td></tr>';}).join('')+'<tr class="total"><td colspan="3">All fixed work quantities (used)</td><td class="num">'+(t.totalUsed===null?'<span class="pending-quantity">รอข้อมูลเสริม</span>':fmt(t.totalUsed)+' m²')+'</td></tr></tbody></table>';
    $('componentSummary').innerHTML='<table><thead><tr><th>Component</th><th>Shape / topology</th><th class="num">PU calculated</th><th class="num">Mortar calculated</th><th class="num">Route length</th></tr></thead><tbody>'+state.components.map(c=>{const r=calc(c),shape=c.type==='stair'?stairTypeMeta(c.stairType||'type1').label:shapes[c.shape],profile=c.shape==='surveySection'?SURVEY_SECTION_PROFILES[surveySectionKey(c.sectionType)]:null,mortarText=r.errors.length?'รอมิติ':(profile?.material==='steel'?'—':(c.shape==='surveySection'&&r.mortarComplete===false?'รอรายละเอียดหน้าตัด':fmt(r.mortar)+' m²'));return '<tr><td>'+esc(c.name)+'</td><td>'+esc(shape)+'</td><td class="num">'+(r.errors.length?'รอมิติ':fmt(r.pu)+' m²')+'</td><td class="num">'+mortarText+'</td><td class="num">'+(r.errors.length?'รอมิติ':fmt(r.route)+' m')+'</td></tr>';}).join('')+'</tbody></table>';
 }
@@ -382,7 +383,7 @@ function csvText(){
  rows.push([],['Component','Shape / stair type','Dimensions (m)','Input status','PU subtotal (m²)','Mortar subtotal (m²)','Route subtotal (m)']);
  state.components.forEach(c=>{const r=calc(c);rows.push([c.name,c.type==='stair'?c.stairType:c.shape,fieldDefs(c).map(([k])=>k+'='+(c.d[k]??'')).join('; '),r.errors.length?'PENDING':'OK',r.errors.length?'':r.pu,r.errors.length||c.shape==='surveySection'?'':r.mortar,r.errors.length?'':r.route]);});
  rows.push([],['Work quantity','Calculated subtotal (m²)','Calculation complete','Override enabled','Override input (m²)','Used (m²)','Status']);
- QUANTITY_KEYS.forEach(k=>{const x=t.quantities[k],e=state.overrides[k];rows.push([QUANTITY_INFO[k].label,x.calculated,x.complete,e.enabled,e.value,x.valid?x.used:'',x.valid?'OK':'PENDING / INVALID']);});
+ QUANTITY_KEYS.forEach(k=>{const x=t.quantities[k],e=state.overrides[k];rows.push([QUANTITY_INFO[k].label,x.calculated,x.complete,e.enabled,e.value,x.valid?x.used:'',x.partial?'PARTIAL — ยังไม่รวมบันไดที่ขาด B/H':x.valid?'OK':'PENDING / INVALID']);});
  rows.push([],['Cost-estimate work item','Code','Quantity','Unit','Rate','Amount','Source','Note']);
  workRows(t).filter(row=>row.entry.enabled&&row.app.ok).forEach(row=>rows.push([row.item.name,row.item.code,row.quantity,row.item.unit,row.item.rate,row.amount,row.entry.source==='manual'?'manual':'calculated',row.entry.note||'']));
  return '\uFEFF'+rows.map(row=>row.map(csvEscape).join(',')).join('\r\n');

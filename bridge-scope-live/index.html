@@ -422,7 +422,8 @@
     }
 
     function calculatorWorkRows(r){
-      return Array.isArray(r?.calculator?.workItems) ? r.calculator.workItems.filter(x=>x&&Number(x.quantity)>=0).map(x=>({...x,quantity:Number(x.quantity)||0,rate:Number(x.rate)||0,amount:Number(x.amount)||((Number(x.quantity)||0)*(Number(x.rate)||0))})) : null;
+      const removedCodes=new Set(['1.1.13.1','1.1.13.2','1.1.13.3']);
+      return Array.isArray(r?.calculator?.workItems) ? r.calculator.workItems.filter(x=>x&&!removedCodes.has(String(x.code||''))&&Number(x.quantity)>=0).map(x=>({...x,quantity:Number(x.quantity)||0,rate:Number(x.rate)||0,amount:Number(x.amount)||((Number(x.quantity)||0)*(Number(x.rate)||0))})) : null;
     }
     function reportPage(b,r){
       const calcRows=calculatorWorkRows(r), useCalculator=Array.isArray(calcRows);

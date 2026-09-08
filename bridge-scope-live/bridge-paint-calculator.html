@@ -190,16 +190,63 @@ function stairTypePicker(c){
   return '<div class="type-picker"><span>รูปแบบบันได / Stair type</span><select id="stairTypeSelect" aria-label="เลือก Type บันได">'+Object.keys(STAIR_TYPE_INFO).map(k=>'<option value="'+k+'" '+(k===type?'selected':'')+'>'+esc(STAIR_TYPE_INFO[k].label)+'</option>').join('')+'</select><div class="type-options">'+Object.keys(STAIR_TYPE_INFO).map(k=>'<button type="button" class="type-option '+(k===type?'selected':'')+'" data-stair-type="'+k+'" aria-pressed="'+(k===type?'true':'false')+'">'+typeThumbSVG(k)+'<b>'+esc(k.replace('type','Type '))+'</b><small>'+esc(STAIR_TYPE_INFO[k].note)+'</small></button>').join('')+'</div><p class="topology-note">'+esc(stairTypeMeta(type).note)+' สูตร preset ใช้เฉพาะความกว้าง B และความสูงรวม H; ค่าลูกตั้ง/ลูกนอน/ชานพักถูกอนุมานจาก Type</p></div>';
 }
 
+const DWG_SECTION_SHAPES=Object.freeze({
+ '1':{label:'Type 1',elevation:[
+   {d:'M86 84 H214 L195 103 H105 Z',fill:'#dbeaf0'},
+   {d:'M126 103 H174 V119 H126 Z',fill:'#dbeaf0'},
+   {d:'M137 119 V201 H163 V119 Z',fill:'#dbeaf0'},
+   {d:'M112 201 H188'}
+ ],cross:[{d:'M326 94 H454 L428 148 H352 Z',fill:'#dbeaf0'}]},
+ '2':{label:'Type 2',elevation:[
+   {d:'M86 84 H214 L195 103 H105 Z',fill:'#dbeaf0'},
+   {d:'M126 103 H174 V119 H126 Z',fill:'#dbeaf0'},
+   {d:'M137 119 V201 H163 V119 Z',fill:'#dbeaf0'},
+   {d:'M112 201 H188'}
+ ],cross:[{d:'M326 94 H454 L428 143 H404 V154 H376 V143 H352 Z',fill:'#dbeaf0'}]},
+ '5':{label:'Type 5',elevation:[
+   {d:'M90 82 H210 V101 H193 L183 115 H117 L107 101 H90 Z',fill:'#dbeaf0'},
+   {d:'M137 115 H163 V201 H137 Z',fill:'#dbeaf0'},
+   {d:'M112 201 H188'}
+ ],cross:[{d:'M328 94 H452 V116 H437 L426 132 H354 L343 116 H328 Z',fill:'#dbeaf0'}]},
+ '8':{label:'Type 8',elevation:[
+   {d:'M92 86 H208 V108 H92 Z',fill:'#dbeaf0'},
+   {d:'M138 108 H162 V201 H138 Z',fill:'#dbeaf0'},
+   {d:'M112 201 H188'}
+ ],cross:[{d:'M326 92 H454 V142 H326 Z',fill:'#dbeaf0'},{d:'M326 117 H454'}]},
+ '17':{label:'Type 17',elevation:[
+   {d:'M143 86 H177 L180 102 H140 Z',fill:'#dbeaf0'},
+   {d:'M143 102 H177 C176 132 181 171 197 201 H123 C139 171 144 132 143 102 Z',fill:'#dbeaf0'},
+   {d:'M108 201 H212'}
+ ],cross:[{d:'M330 99 H450 L434 137 H346 Z',fill:'#dbeaf0'},{d:'M346 137 H366 V148 H414 V137 H434'}]},
+ '34':{label:'Type 34',elevation:[
+   {d:'M130 86 H190 V103 H130 Z',fill:'#dbeaf0'},
+   {d:'M143 103 H177 V201 H143 Z',fill:'#dbeaf0'},
+   {d:'M112 201 H188'}
+ ],cross:[{d:'M326 99 H454 V125 H326 Z',fill:'#dbeaf0'},{d:'M338 112 H442'}]},
+ '36':{label:'Type 36',elevation:[
+   {d:'M130 86 H190 V103 H130 Z',fill:'#dbeaf0'},
+   {d:'M143 103 H177 V201 H143 Z',fill:'#dbeaf0'},
+   {d:'M112 201 H188'}
+ ],cross:[{d:'M326 94 H454 V115 H441 V128 H339 V115 H326 Z',fill:'#dbeaf0'},{d:'M339 115 H441'}]},
+ _default:{label:'ไม่พบต้นแบบ',elevation:[
+   {d:'M94 92 H206 V111 H94 Z',fill:'#fff7e8'},
+   {d:'M139 111 H161 V201 H139 Z',fill:'#fff7e8'},
+   {d:'M112 201 H188'}
+ ],cross:[{d:'M326 96 H454 V137 H326 Z',fill:'#fff7e8'}]}
+});
+function sectionShapeMarkup(items){return items.map(p=>'<path d="'+p.d+'" fill="'+(p.fill||'none')+'" stroke="#17324b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' ).join('');}
 function surveySectionDiagram(c){
- const d=c.d||{},valid=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))&&Number(v)>0,show=v=>valid(v)?String(Number(Number(v).toFixed(6)))+' m':'ยังไม่ระบุ';
- const A=valid(d.A)?Number(d.A):2,B=valid(d.B)?Number(d.B):A,C=valid(d.C)?Number(d.C):.3,S=valid(d.S)?Number(d.S):0,sc=230/Math.max(A,B,S,1),cx=260,y=74,bottom=y+Math.max(15,Math.min(58,C*sc)),ax=cx-A*sc/2,bx=cx-B*sc/2;
- let s='<svg viewBox="0 0 520 260" role="img" aria-label="Section '+esc(c.sectionType||'')+' A B C S dimension envelope"><text x="260" y="22" text-anchor="middle">กรอบมิติหน้าตัด · ไม่ใช่รายละเอียดชิ้นส่วนเหล็ก</text>';
- s+='<path d="M'+ax+' '+y+' H'+(cx+A*sc/2)+' L'+(cx+B*sc/2)+' '+bottom+' H'+bx+' Z" fill="none" stroke="#17324b" stroke-width="2" stroke-dasharray="5 3"/>';
- s+=line(ax,54,cx+A*sc/2,54)+line(ax,49,ax,59)+line(cx+A*sc/2,49,cx+A*sc/2,59)+'<text x="260" y="46" text-anchor="middle">A ด้านบน = '+show(d.A)+'</text>';
- s+=line(bx,bottom+18,cx+B*sc/2,bottom+18)+'<text x="260" y="'+(bottom+35)+'" text-anchor="middle">B ด้านล่าง = '+show(d.B)+'</text>';
- s+=line(95,y,95,bottom)+'<text x="85" y="'+(y+10)+'" text-anchor="end">C = '+show(d.C)+'</text>';
- if(S){const l=cx-S*sc/2,r=cx+S*sc/2;s+=line(l,175,l,198,'#087e83')+line(r,175,r,198,'#087e83')+line(l,186,r,186,'#087e83');}
- s+='<text x="260" y="215" text-anchor="middle">S ระยะห่างโครงถัก = '+show(d.S)+'</text><text x="260" y="246" text-anchor="middle">ความยาวช่วง L = '+show(d.L)+'</text></svg>';return s;
+ const key=String(c.sectionType??'').trim().replace(/^0+(?=\d)/,'')||'';
+ const shape=DWG_SECTION_SHAPES[key]||DWG_SECTION_SHAPES._default;
+ const known=Boolean(DWG_SECTION_SHAPES[key]);
+ let s='<svg viewBox="0 0 520 240" role="img" aria-label="'+esc(shape.label)+' รูปด้านและรูปตัด อ้างอิงจาก DWG">';
+ s+='<text x="260" y="22" text-anchor="middle">'+esc(shape.label)+' · รูปลักษณ์และสัดส่วนอ้างอิงจาก DWG</text>';
+ s+='<text x="150" y="49" text-anchor="middle">รูปด้าน</text><text x="390" y="49" text-anchor="middle">รูปตัด</text>';
+ s+='<g aria-label="รูปด้าน">'+sectionShapeMarkup(shape.elevation)+'</g><g aria-label="รูปตัด">'+sectionShapeMarkup(shape.cross)+'</g>';
+ s+='<line x1="72" y1="207" x2="228" y2="207" stroke="#6c8997" stroke-width="1.5"/><line x1="312" y1="164" x2="468" y2="164" stroke="#6c8997" stroke-width="1.5"/>';
+ s+='<text x="260" y="228" text-anchor="middle">เทียบรูปทรงเท่านั้น · ไม่ใช้ขนาดจาก DWG ในการคำนวณ</text>';
+ if(!known)s+='<text x="390" y="186" text-anchor="middle" fill="#805b1b">ยังไม่มีรหัสนี้ใน DWG</text>';
+ return s+'</svg>';
 }
 function pendingDiagram(c){return '<svg viewBox="0 0 440 270" role="img" aria-label="Pending survey dimensions"><rect x="62" y="62" width="316" height="142" rx="5" fill="#fff7e8" stroke="#a1413d" stroke-dasharray="7 5"/><text x="220" y="126" text-anchor="middle">รอกรอกมิติจากการสำรวจ</text><text x="220" y="150" text-anchor="middle">'+esc(c.name||'Component')+'</text></svg>';}
 function diagram(c){return c.type==='span'&&c.shape==='surveySection'?surveySectionDiagram(c):c.type==='stair'?stairDiagram(c):calc(c).errors.length?pendingDiagram(c):diagramLegacy(c);}

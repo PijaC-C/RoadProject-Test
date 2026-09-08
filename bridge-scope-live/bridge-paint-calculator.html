@@ -91,7 +91,7 @@ function calc(c){
  if(c.type==='span'&&c.shape==='surveySection')return calcSurvey(c);
  const d=c.d||{};
  const stairTopArea=c.type==='stair'&&positiveNumber(d.topArea)?Number(d.topArea):null;
- if(c.type==='stair'&&!stairLayout(c).valid&&stairTopArea!==null){
+ if(c.type==='stair'&&stairTopArea!==null){
   const enabled=!c.faces||c.faces.top!==false;
   return {errors:[],rows:[{key:'top',label:'พื้นที่ Top view บันไดจากการสำรวจ',formula:'กรอกพื้นที่รวมด้านบนของบันไดและชานพัก',area:enabled?stairTopArea:0,group:'pu'}],pu:enabled?stairTopArea:0,mortar:0,paint:0,paintConcrete:0,paintSteel:0,paintConcreteComplete:true,paintSteelComplete:true,paintComplete:true,mortarComplete:false,geometryComplete:false,stairTopOnly:true,route:0,net:enabled?stairTopArea:0};
  }
@@ -168,9 +168,9 @@ const COLUMN_RADIUS_M=1.5;
 function ensureWorkScope(s){if(!s||typeof s!=='object')return s;if(!s.workScope||typeof s.workScope!=='object'||Array.isArray(s.workScope))s.workScope={};WORK_CATALOG.forEach(item=>{const old=s.workScope[item.id];if(!old||typeof old!=='object'||Array.isArray(old))s.workScope[item.id]={enabled:false,quantity:null,note:'',source:''};else{s.workScope[item.id]={enabled:old.enabled===true,quantity:old.quantity===null||old.quantity===undefined||old.quantity===''?null:Number(old.quantity),note:String(old.note||''),source:old.source==='manual'?'manual':''};}});if(Array.isArray(s.workItems))s.workItems=s.workItems.filter(x=>!REMOVED_WORK_CODES.has(String(x?.code||'')));return s;}
 function workProfile(s=state){const structure=String(s?.survey?.structureType||'');const concrete=/คอนกรีต/.test(structure),steelWord=/เหล็ก/.test(structure),mixed=concrete&&steelWord&&/(\/|,|\+|และ)/.test(structure);return {structure,concrete,steel:steelWord&&(!concrete||mixed),roof:s?.survey?.roofStatus||'unknown'};}
 function workApplicable(item,p=workProfile()){if(item.condition==='all')return {ok:true,text:'ทุกประเภทโครงสร้าง'};if(item.condition==='concrete')return p.concrete?{ok:true,text:'โครงสร้างคอนกรีต'}:{ok:false,text:p.steel?'เฉพาะโครงสร้างคอนกรีต':'ระบุประเภทโครงสร้างก่อน'};if(item.condition==='steel')return p.steel?{ok:true,text:'โครงสร้างเหล็ก'}:{ok:false,text:p.concrete?'เฉพาะโครงสร้างเหล็ก':'ระบุประเภทโครงสร้างก่อน'};if(item.condition==='roof')return p.roof==='has'?{ok:true,text:'สะพานมีหลังคา'}:{ok:false,text:p.roof==='none'?'สะพานนี้ระบุว่าไม่มีหลังคา':'เลือก มีหลังคา/ไม่มีหลังคาก่อน'};return {ok:false,text:'ตรวจสอบเงื่อนไข'};}
-function workAutoLabel(auto){const columns=effectiveColumnCount();return ({puTotal:'PU รวม Deck + Stair',concreteTop:'พื้นที่ Top view รวม Deck + Stair จากข้อมูลสำรวจ',concretePaint:'Top view + 2π × 1.5 m × H จาก PDF × '+columns+' เสา',mortar:'พื้นที่ปูน/ฉาบจากรูปตัด',paint:'พื้นที่ทาสีจากรูปตัด',marking:'แนวเส้นทางเดินจากช่วงที่มีข้อมูล',drainHeight:'ความสูงช่องลอด × 2'}[auto]||auto);}
+function workAutoLabel(auto){const columns=effectiveColumnCount()??'รอยืนยันจำนวน';return ({puTotal:'PU รวม Deck + Stair',concreteTop:'พื้นที่ Top view รวม Deck + Stair จากข้อมูลสำรวจ',concretePaint:'Top view + 2π × 1.5 m × H จาก PDF × '+columns+' เสา',mortar:'พื้นที่ปูน/ฉาบจากรูปตัด',paint:'พื้นที่ทาสีจากรูปตัด',marking:'แนวเส้นทางเดินจากช่วงที่มีข้อมูล',drainHeight:'ความสูงช่องลอด × 2'}[auto]||auto);}
 function workCalculated(item,t){if(!item.auto)return null;const app=workApplicable(item,workProfile(state));if(!app.ok)return null;if(item.auto==='puTotal')return t.quantities?.puDeck?.valid&&t.quantities?.puStair?.valid?Number(t.puDeck)+Number(t.puStair):null;if(item.auto==='concreteTop')return t.topViewAvailable?Number(t.topView||0):null;if(item.auto==='concretePaint')return t.paintConcreteAvailable?Number(t.paintConcrete||0):null;if(item.auto==='drainHeight'){const h=Number(state.survey?.clearanceHeight);return Number.isFinite(h)&&h>0?h*2:null;}if(item.auto==='mortar'){if(t.mortarSectionAvailable)return t.mortarSectionComplete?Number(t.mortarSection||0):null;const q=t.quantities?.mortar;return q?.valid?Number(q.used):null;}if(item.auto==='paint'){const steel=item.condition==='steel';const available=steel?t.paintSteelAvailable:t.paintConcreteAvailable;const complete=steel?t.paintSteelComplete:t.paintConcreteComplete;return available&&complete?Number(steel?t.paintSteel:t.paintConcrete):null;}if(item.auto==='marking'&&t.markingSectionAvailable)return Number(t.markingSection||0);const q=t.quantities?.[item.auto];return q?.valid?Number(q.used):null;}
-function workRows(t=totals()){ensureWorkScope(state);const profile=workProfile(state);return WORK_CATALOG.map(item=>{const entry=state.workScope[item.id],app=workApplicable(item,profile),calculated=workCalculated(item,t),calculatedPartial=(item.auto==='marking'&&t.markingSectionAvailable&&t.markingSectionComplete===false)||(item.auto==='concreteTop'&&calculated!==null&&t.topViewComplete===false)||(item.auto==='concretePaint'&&calculated!==null&&t.paintConcreteComplete===false),manual=entry.source==='manual'?(validOverrideValue(entry.quantity)?Number(entry.quantity):null):null,quantity=entry.source==='manual'?manual:(calculated!==null?calculated:(validOverrideValue(entry.quantity)?Number(entry.quantity):null)),topViewIncomplete=item.auto==='concreteTop'&&t.topViewComplete===false,valid=entry.enabled&&app.ok&&quantity!==null&&Number.isFinite(quantity)&&quantity>=0&&(!topViewIncomplete||entry.source==='manual');return {item,entry,app,calculated,calculatedPartial,quantity,valid,amount:valid?quantity*Number(item.rate):0};});}
+function workRows(t=totals()){ensureWorkScope(state);const profile=workProfile(state);return WORK_CATALOG.map(item=>{const entry=state.workScope[item.id],app=workApplicable(item,profile),calculated=workCalculated(item,t),calculatedPartial=(item.auto==='marking'&&t.markingSectionAvailable&&t.markingSectionComplete===false)||(item.auto==='concreteTop'&&calculated!==null&&t.topViewComplete===false)||(item.auto==='concretePaint'&&calculated!==null&&t.paintConcreteComplete===false),manual=entry.source==='manual'?(validOverrideValue(entry.quantity)?Number(entry.quantity):null):null,quantity=entry.source==='manual'?manual:(calculated!==null?calculated:(validOverrideValue(entry.quantity)?Number(entry.quantity):null)),topViewIncomplete=(item.auto==='concreteTop'&&t.topViewComplete===false)||(item.auto==='concretePaint'&&t.paintConcreteComplete===false),valid=entry.enabled&&app.ok&&quantity!==null&&Number.isFinite(quantity)&&quantity>=0&&(!topViewIncomplete||entry.source==='manual');return {item,entry,app,calculated,calculatedPartial,quantity,valid,amount:valid?quantity*Number(item.rate):0};});}
 function workTotal(t=totals()){return workRows(t).reduce((sum,row)=>sum+(row.valid?row.amount:0),0);}
 function stairTypeMeta(type){return STAIR_TYPE_INFO[type]||STAIR_TYPE_INFO.type1;}
 function sideStair(side){return state.components.find(c=>c.type==='stair'&&c.side===side)||null;}
@@ -428,7 +428,7 @@ function bind(){
   $('unit').onchange=e=>{state.unit=e.target.value;saveState();renderAll()};$('leftStairType').onchange=e=>setSideStairType('left',e.target.value);$('rightStairType').onchange=e=>setSideStairType('right',e.target.value);$('applyLayout').onclick=applyLayout;$('save').onclick=()=>{saveState();download(savedHTML(),'text/html;charset=utf-8','bridge-paint-calculator.html');toast('Portable HTML saved.')};$('csv').onclick=()=>download(csvText(),'text/csv;charset=utf-8','bridge-surface-areas.csv');
 }
 function columnHeightFromPdf(s=state){const h=Number(s?.survey?.clearanceHeight);return Number.isFinite(h)&&h>0?h:null;}
-function effectiveColumnCount(s=state){const n=Math.round(Number(s?.layout?.columns));return Number.isFinite(n)&&n>0?n:DEFAULT_COLUMN_COUNT;}
+function effectiveColumnCount(s=state){const raw=s?.survey?.confirmedColumnCount;return raw!==null&&raw!==undefined&&raw!==''&&Number.isInteger(Number(raw))&&Number(raw)>=0?Number(raw):null;}
 function columnShaftPaintArea(c,s=state){
   const H=columnHeightFromPdf(s);
   if(H===null)return {area:0,valid:false,radius:COLUMN_RADIUS_M,height:null};
@@ -437,7 +437,7 @@ function columnShaftPaintArea(c,s=state){
 function calculatedTotals(){
  const t={puDeck:0,puStair:0,topView:0,topViewAvailable:false,topViewComplete:true,deckTop:0,deckTopAvailable:false,deckTopComplete:true,mortarDeck:0,mortarColumn:0,mortarStair:0,mortarSection:0,mortarSectionAvailable:false,mortarSectionComplete:true,columnConcretePaint:0,columnConcretePaintAvailable:false,columnConcretePaintComplete:true,paint:0,paintConcrete:0,paintSteel:0,paintConcreteAvailable:false,paintSteelAvailable:false,paintConcreteComplete:true,paintSteelComplete:true,paintComplete:true,routeSection:0,markingSection:0,markingSectionAvailable:false,markingSectionComplete:true,route:0,invalidComponents:[],complete:{puDeck:true,puStair:true,mortar:true,marking:true,crack:true}};
  const columnPaint=columnShaftPaintArea(null,state),columnCount=effectiveColumnCount(state);
- if(columnPaint.valid){t.columnConcretePaint=columnPaint.area*columnCount;t.columnConcretePaintAvailable=true;}else t.columnConcretePaintComplete=false;
+ if(columnPaint.valid&&columnCount!==null){t.columnConcretePaint=columnPaint.area*columnCount;t.columnConcretePaintAvailable=true;}else t.columnConcretePaintComplete=false;
  for(const c of state.components){
   const r=calc(c);
   if(r.errors.length){
@@ -456,7 +456,7 @@ function calculatedTotals(){
  t.deckTopComplete=t.deckTopAvailable&&t.deckTopComplete;
  t.topViewComplete=t.topViewAvailable&&t.topViewComplete;
  t.puTotal=t.puDeck+t.puStair;t.mortarTotal=t.mortarDeck+t.mortarColumn+t.mortarStair;t.marking=t.route*MARK_WIDTH;t.markingSection=t.routeSection*MARK_WIDTH;t.crack=0;
- t.paintConcrete=t.deckTop+t.columnConcretePaint;t.paintConcreteAvailable=t.deckTopAvailable;t.paintConcreteComplete=t.deckTopComplete&&t.columnConcretePaintAvailable&&t.columnConcretePaintComplete;
+ t.paintConcrete=t.topView+t.columnConcretePaint;t.paintConcreteAvailable=t.topViewAvailable;t.paintConcreteComplete=t.topViewComplete&&t.columnConcretePaintAvailable&&t.columnConcretePaintComplete;
  t.calculated={puDeck:t.puDeck,puStair:t.puStair,topView:t.topView,mortar:t.mortarTotal,mortarSection:t.mortarSection,paint:t.paint,paintConcrete:t.paintConcrete,paintSteel:t.paintSteel,marking:t.marking,crack:0};return t;
 }
 function updateTotals(){
@@ -508,6 +508,19 @@ function topView(){
   for(let i=0;i<l.columns;i++){const x=x0+(i+1)*(x1-x0)/(Math.max(1,l.columns+1));s+='<circle cx="'+x+'" cy="'+(deckY+deckH/2)+'" r="7" fill="#fff" stroke="#17324b" stroke-width="2"/><text x="'+x+'" y="'+(deckY+deckH+18)+'" text-anchor="middle">C'+(i+1)+'</text>';}
   const left=state.components.filter(c=>c.type==='stair'&&c.side==='left'),right=state.components.filter(c=>c.type==='stair'&&c.side==='right'),cy0=deckY+deckH/2;left.forEach((c,i)=>{const cy=cy0+(i-(left.length-1)/2)*rowGap;s+=topStairPlan(c,'left',x0,cy,i,left.length)+planConnectionLeader(x0,cy,deckY,deckH);});right.forEach((c,i)=>{const cy=cy0+(i-(right.length-1)/2)*rowGap;s+=topStairPlan(c,'right',x1,cy,i,right.length)+planConnectionLeader(x1,cy,deckY,deckH);});s+='<text x="'+(w/2)+'" y="'+(h-9)+'" text-anchor="middle" font-size="11">สีเหลืองคือชานพัก · เส้นประแสดงจุดเชื่อมเมื่อแยกรูปหลายชุด</text></svg>';return s;
 }
+// Present only the inputs used by the work estimate; retain legacy calculations for saved data.
+const renderWorkScopeOriginal=renderWorkScope;
+renderWorkScope=function(){
+ renderWorkScopeOriginal();
+ $('calculationDetails').hidden=true;
+ $('quantityOverrides').hidden=true;
+ let host=$('estimateInputs');
+ if(!host){host=document.createElement('section');host.id='estimateInputs';host.className='layout-panel';$('workScopePanel').before(host);}
+ const t=calculatedTotals(),stairs=state.components.filter(c=>c.type==='stair');
+ const input=(label,key,value,id)=>'<label>'+label+'<input type="number" min="0" step="any" data-estimate-key="'+key+'" data-estimate-id="'+id+'" value="'+esc(value??'')+'"></label>';
+ host.innerHTML='<h2>ข้อมูลที่ใช้คำนวณ</h2><p>พื้นที่รวม = พื้นสะพาน + บันไดรวมชานพัก · พื้นที่เสา = 2π × 1.5 × H ช่องลอด × จำนวนเสา</p><div class="survey-grid">'+input('จำนวนเสาที่ตรวจยืนยัน (ต้น)','columns',effectiveColumnCount(),'')+'</div>'+stairs.map(c=>'<div><h3>'+esc(c.name)+'</h3><div class="survey-grid"><label>ประเภทบันได<select data-estimate-key="type" data-estimate-id="'+c.id+'">'+Object.keys(STAIR_TYPE_INFO).map(k=>'<option value="'+k+'" '+(c.stairType===k?'selected':'')+'>'+esc(stairTypeMeta(k).label)+'</option>').join('')+'</select></label>'+input('ความกว้างบันได (ม.)','B',c.d.B,c.id)+input('ความสูงขึ้นบันไดรวม (ม.)','H',c.d.H,c.id)+input('หรือพื้นที่บันไดรวมชานพักที่วัดไว้ (ตร.ม.)','topArea',c.d.topArea,c.id)+'</div></div>').join('')+'<p>พื้นสะพาน '+fmt(t.puDeck)+' ตร.ม. · บันได '+(t.complete.puStair?fmt(t.puStair)+' ตร.ม.':'รอความกว้าง/ความสูง หรือพื้นที่วัดจริง')+' · พื้นที่เสา '+(t.columnConcretePaintAvailable?fmt(t.columnConcretePaint)+' ตร.ม.':'รอจำนวนเสา')+'</p><p class="scope-help">เมื่อใช้ความกว้างและความสูง ระบบประมาณลูกนอนและชานพักตามประเภทบันได ส่วนพื้นที่ที่กรอกตรงต้องรวมชานพักแล้ว</p>';
+ host.querySelectorAll('[data-estimate-key]').forEach(el=>el.onchange=()=>{const key=el.dataset.estimateKey,c=stairs.find(c=>c.id===el.dataset.estimateId);if(key==='columns'){state.survey.confirmedColumnCount=el.value===''?null:Number(el.value);}else if(key==='type'){c.stairType=el.value;}else{c.d[key]=el.value===''?null:Number(el.value);}saveState();renderAll();});
+};
 resetQuantityState(state);
 ensureEnhancedState(state);
 bind();renderAll();saveState();

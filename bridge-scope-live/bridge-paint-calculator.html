@@ -201,6 +201,11 @@ function ensureEnhancedState(s){
 const QUANTITY_RESET_VERSION=2;
 function resetQuantityState(s){
   if(!s||typeof s!=='object'||s.quantityResetVersion===QUANTITY_RESET_VERSION)return s;
+  // Version 1 was already the intentional zero-default migration.  Preserve
+  // any quantities/ticks saved under that marker and only advance the marker;
+  // resetting them again would erase real survey work when the parent app is
+  // upgraded to version 2.
+  if(Number(s.quantityResetVersion)===1){s.quantityResetVersion=QUANTITY_RESET_VERSION;return s;}
   s.crackRepair=0;
   if(!s.overrides||typeof s.overrides!=='object'||Array.isArray(s.overrides))s.overrides={};
   const oldOverrides=s.overrides;

@@ -225,7 +225,10 @@
     const K='bridge-survey-202609-records', CK='bridge-survey-202609-custom';
     const RECORDS_COLLECTION='bridge_scope_records_v3';
     const CUSTOM_COLLECTION='bridge_scope_custom_bridges_v3';
-    const QUANTITY_RESET_VERSION=1;
+    // Keep this in sync with the calculator's reset marker.  A mismatch here
+    // causes the calculator to clear saved work-item ticks and quantities every
+    // time a bridge is reopened from Firestore.
+    const QUANTITY_RESET_VERSION=2;
     const readStorage=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
     let R=readStorage(K,{}), customBridges=readStorage(CK,[]), B=[...D,...customBridges], sel=null, calcBridgeCode=null, calcFrameLoaded=false;
     let authUser=null, recordsUnsub=null, customUnsub=null, migrationStarted=false, customMigrationStarted=false, quantityResetStarted=false, quantityResetInFlight=false;

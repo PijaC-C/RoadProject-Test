@@ -341,11 +341,11 @@
       if(!sel)return;
       R[sel]=collectRecord(true);localStorage.setItem(K,JSON.stringify(R));marks.get(sel)?.setIcon(icon(sel));render();
       if(!fromCalculator&&calculatorFrameReady()){
-        if(!authUser){toast('บันทึกในเครื่องแล้ว กำลังอ่านค่าจากเครื่องคำนวณ…');}
-        else{
-          try{await setDoc(doc(db,RECORDS_COLLECTION,docId(sel)),recordPayload(sel,R[sel]));toast('บันทึกข้อมูลแล้ว กำลังอ่านค่าจากเครื่องคำนวณ…')}
-          catch(err){console.error('Firestore base save failed',err);toast('บันทึกข้อมูลในเครื่องแล้ว แต่ซิงก์ไม่สำเร็จ')}
-        }
+        // Let the calculator return its current work-scope state first.  The
+        // parent then writes one complete document in applyCalculatorResult.
+        // Writing a base document here races the realtime listener and can
+        // overwrite freshly ticked work items/quantities with the old state.
+        toast(authUser?'กำลังอ่านค่าจากเครื่องคำนวณ…':'บันทึกในเครื่องแล้ว กำลังอ่านค่าจากเครื่องคำนวณ…');
         $('#calcFrame').contentWindow.postMessage({type:'bridge-paint-request-save',bridgeCode:sel},location.origin);
         return;
       }

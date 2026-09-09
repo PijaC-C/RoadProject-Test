@@ -105,13 +105,12 @@
     import { collection, doc, getFirestore, onSnapshot, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
     const firebaseConfig = {
-      apiKey: 'AIzaSyCvYFesTTH5r6yb0tYTUcjNyoCrPtHpzPI',
-      authDomain: 'promap-21ee6.firebaseapp.com',
-      projectId: 'promap-21ee6',
-      storageBucket: 'promap-21ee6.firebasestorage.app',
-      messagingSenderId: '503254900920',
-      appId: '1:503254900920:web:f7fc54a55c1c6c7ac1944d',
-      measurementId: 'G-G0H55RZXLR'
+      apiKey: 'AIzaSyDoeaCi0EcAwohaXaj2VU8R5ls5q7Om8xI',
+      authDomain: 'bridge-survey-pijac-202609.firebaseapp.com',
+      projectId: 'bridge-survey-pijac-202609',
+      storageBucket: 'bridge-survey-pijac-202609.firebasestorage.app',
+      messagingSenderId: '554079069915',
+      appId: '1:554079069915:web:54b46c45b0118acb36cefe',
     };
     const firebaseApp = initializeApp(firebaseConfig);
     const auth = getAuth(firebaseApp);
@@ -223,7 +222,7 @@
     ].map(x => ({id:x[0],name:x[1],unit:x[2],price:x[3]}));
 
     // ใช้ namespace ใหม่เพื่อไม่ให้บันทึกและจุดเพิ่มจากแผนที่ชุดเดิมปะปนกับชุดยังไม่ได้สำรวจ
-    const K='bridge-live-v3-unsurveyed', CK='bridge-custom-v3-unsurveyed';
+    const K='bridge-survey-202609-records', CK='bridge-survey-202609-custom';
     const RECORDS_COLLECTION='bridge_scope_records_v3';
     const CUSTOM_COLLECTION='bridge_scope_custom_bridges_v3';
     const QUANTITY_RESET_VERSION=1;
@@ -255,75 +254,15 @@
       const calculator=data.calculator&&typeof data.calculator==='object'&&!Array.isArray(data.calculator)?data.calculator:null;
       return {date:data.date||t(),inspector:data.inspector||'',overall:data.overall||'',items:data.items||{},calculator,workQuantityResetVersion:Number(calculator?.quantityResetVersion)||0,updated:data.updated||''};
     }
-    function resetSavedQuantityRecord(record){
-      const next={...record,items:{}};
-      Object.entries(record.items||{}).forEach(([id,item])=>{const old=item&&typeof item==='object'&&!Array.isArray(item)?item:{};next.items[id]={...old,sel:false,qty:0}});
-      let calc=record.calculator&&typeof record.calculator==='object'&&!Array.isArray(record.calculator)?JSON.parse(JSON.stringify(record.calculator)):{};
-      calc.crackRepair=0;
-      const oldOverrides=calc.overrides&&typeof calc.overrides==='object'&&!Array.isArray(calc.overrides)?calc.overrides:{};
-      calc.overrides={...oldOverrides};
-      ['puDeck','puStair','mortar','marking','crack'].forEach(k=>{const old=oldOverrides[k]&&typeof oldOverrides[k]==='object'&&!Array.isArray(oldOverrides[k])?oldOverrides[k]:{};calc.overrides[k]={...old,enabled:false,value:0}});
-      const oldScope=calc.workScope&&typeof calc.workScope==='object'&&!Array.isArray(calc.workScope)?calc.workScope:{};
-      calc.workScope={...oldScope};
-      (Array.isArray(window.BRIDGE_WORK_CATALOG)?window.BRIDGE_WORK_CATALOG:[]).forEach(item=>{const old=oldScope[item.id]&&typeof oldScope[item.id]==='object'&&!Array.isArray(oldScope[item.id])?oldScope[item.id]:{};calc.workScope[item.id]={...old,enabled:false,quantity:0,source:''}});
-      calc.workItems=[];
-      calc.quantityResetVersion=QUANTITY_RESET_VERSION;
-      next.calculator=calc;
-      next.workQuantityResetVersion=QUANTITY_RESET_VERSION;
-      return next;
-    }
-    async function migrateSavedQuantities(snap){
-      if(quantityResetInFlight)return true;
-      if(quantityResetStarted)return false;
-      quantityResetStarted=true;
-      const entries=[];
-      snap.forEach(docSnap=>{const data=docSnap.data(),record=normaliseRecord(data);if(data.bridgeCode&&record.workQuantityResetVersion!==QUANTITY_RESET_VERSION)entries.push({code:data.bridgeCode,data,record})});
-      if(!entries.length)return false;
-      quantityResetInFlight=true;
-      setSyncStatus('กำลังตั้งปริมาณงานเป็นศูนย์…');
-      try{
-        const resets=entries.map(({code,record})=>({code,record:resetSavedQuantityRecord(record)}));
-        await Promise.all(resets.map(({code,record})=>setDoc(doc(db,RECORDS_COLLECTION,docId(code)),recordPayload(code,record))));
-        resets.forEach(({code,record})=>{R[code]=record});
-        localStorage.setItem(K,JSON.stringify(R));
-        setSyncStatus('ฐานข้อมูลพร้อมใช้งาน');
-        return true;
-      }catch(err){
-        console.error('Firestore quantity reset failed',err);
-        quantityResetStarted=false;
-        setSyncStatus('ตั้งปริมาณงานเป็นศูนย์ไม่สำเร็จ');
-        return false;
-      }finally{quantityResetInFlight=false}
-    }
-    async function migrateLocalRecords(){
-      if(migrationStarted||!authUser)return false;
-      migrationStarted=true;
-      let local=readStorage(K,{}), entries=Object.entries(local).filter(([code,r])=>B.some(b=>b.code===code)&&r?.updated);
-      if(!entries.length)return false;
-      setSyncStatus('กำลังย้ายข้อมูลเดิมขึ้นฐานข้อมูล…');
-      await Promise.all(entries.map(([code,record])=>setDoc(doc(db,RECORDS_COLLECTION,docId(code)),recordPayload(code,record))));
-      return true;
-    }
     function subscribeRecords(){
       recordsUnsub?.();
       recordsUnsub=onSnapshot(collection(db,RECORDS_COLLECTION),async snap=>{
-        if(await migrateLocalRecords()){render();return}
-        if(await migrateSavedQuantities(snap)){render();return}
         if(snap.empty){
           R={};localStorage.setItem(K,JSON.stringify(R));render();setSyncStatus('ฐานข้อมูลพร้อมใช้งาน');return;
         }
         let next={};snap.forEach(x=>{let d=x.data();if(d.bridgeCode)next[d.bridgeCode]=normaliseRecord(d)});
         R=next;localStorage.setItem(K,JSON.stringify(R));render();setSyncStatus('ซิงก์ฐานข้อมูลแล้ว');
       },err=>{console.error('Firestore records error',err);setSyncStatus('ฐานข้อมูลเชื่อมต่อไม่ได้')});
-    }
-    async function migrateLocalCustomBridges(){
-      if(customMigrationStarted||!authUser)return false;
-      customMigrationStarted=true;
-      let local=readStorage(CK,[]).filter(x=>x?.custom&&x.code);
-      if(!local.length)return false;
-      setSyncStatus('กำลังย้ายจุดที่เพิ่มเดิมขึ้นฐานข้อมูล…');
-      await Promise.all(local.map(b=>setDoc(doc(db,CUSTOM_COLLECTION,docId(b.code)),{...b,createdBy:authUser.uid,createdAt:serverTimestamp()})));
-      return true;
     }
     function rebuildMarkers(){
       marks.forEach(z=>z.remove());marks=new Map();B.forEach(marker);
@@ -332,7 +271,6 @@
     function subscribeCustomBridges(){
       customUnsub?.();
       customUnsub=onSnapshot(collection(db,CUSTOM_COLLECTION),async snap=>{
-        if(await migrateLocalCustomBridges()){render();return}
         if(snap.empty){customBridges=[]}
         else customBridges=snap.docs.map(x=>({code:x.id,...x.data(),custom:true}));
         B=[...D,...customBridges];localStorage.setItem(CK,JSON.stringify(customBridges));
@@ -449,7 +387,7 @@
       calcBridgeCode=code;
       calcFrameLoaded=false;
       frame.onload=()=>{calcFrameLoaded=true;frame.contentWindow?.postMessage({type:'bridge-paint-load-state',bridgeCode:code,state:R[code]?.calculator||null},location.origin)};
-      frame.src='bridge-paint-calculator.html?bridge='+encodeURIComponent(code);
+      frame.src='bridge-paint-calculator.html?database=202609&bridge='+encodeURIComponent(code);
     }
     async function applyCalculatorResult(data){
       let code=data.bridgeCode;

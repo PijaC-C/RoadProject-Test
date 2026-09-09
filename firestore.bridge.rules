@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  match /bridge_scope_records_v3/{id} {
+   allow read: if request.auth != null;
+   allow create, update: if request.auth != null && request.resource.data.bridgeCode == id && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time;
+  }
+  match /bridge_scope_custom_bridges_v3/{id} {
+   allow read: if request.auth != null;
+   allow create, update: if request.auth != null && request.resource.data.code == id && request.resource.data.createdBy == request.auth.uid && request.resource.data.lat is number && request.resource.data.lng is number;
+  }
+ }
+}

@@ -16,6 +16,7 @@ window.BRIDGE_SURVEY_DATA = {
   BR154:{sourceRef:'รายงานตรวจสอบครั้งที่ 1 ปี 2564 · BR154.pdf',structureType:'คอนกรีตเสริมเหล็ก',clearanceHeight:5.449,clearanceHeights:[5.449],spanCount:1,stairs:2,spans:[{L:24.47,sectionType:'1',A:3.22,B:1.19,C:1.264,S:null}]},
   BR155:{sourceRef:'รายงานตรวจสอบครั้งที่ 1 ปี 2564 · BR155.pdf',structureType:'คอนกรีตเสริมเหล็ก',clearanceHeight:5.789,clearanceHeights:[5.789],spanCount:1,stairs:2,spans:[{L:24.538,sectionType:'1',A:3.14,B:1.11,C:1.301,S:null}]},
   BR157:{sourceRef:'รายงานตรวจสอบครั้งที่ 1 ปี 2564 · BR157.pdf',structureType:'คอนกรีตเสริมเหล็ก',clearanceHeight:5.847,clearanceHeights:[5.847],spanCount:1,stairs:2,spans:[{L:29.571,sectionType:'1',A:3.05,B:1.1,C:.95,S:null}]},
+  BR158:{sourceRef:'รายงานตรวจสอบครั้งที่ 1 ปี 2564 · BR158.pdf',structureType:'เหล็ก',clearanceHeight:5.452,clearanceHeights:[5.452],spanCount:1,stairs:4,spans:[{L:36.435,sectionType:'8',A:2.75,B:2.75,C:.23,S:2.5}]},
   BR160:{sourceRef:'รายงานตรวจสอบครั้งที่ 1 ปี 2564 · BR160.pdf',structureType:'เหล็ก',clearanceHeight:5.187,clearanceHeights:[5.187],spanCount:1,stairs:2,spans:[{L:27.522,sectionType:'36',A:2.52,B:2.52,C:.36,S:1.9}]},
   BR376:{sourceRef:'รายงานตรวจสอบครั้งที่ 1 ปี 2564 · BR376.pdf',structureType:'เหล็ก',clearanceHeight:5.672,clearanceHeights:[5.672],spanCount:1,stairs:2,spans:[{L:33.453,sectionType:'8',A:2.6,B:2.6,C:.34,S:2}]},
   BR396:{sourceRef:'รายงานตรวจสอบครั้งที่ 1 ปี 2564 · BR396.pdf',structureType:'คอนกรีตเสริมเหล็ก',clearanceHeight:5.58,clearanceHeights:[5.58],spanCount:1,stairs:2,spans:[{L:21.95,sectionType:'1',A:3.06,B:1,C:1,S:null}]},
@@ -51,4 +52,4 @@ const BRIDGE_ROOFED_FROM_REPORT = new Set(['BR160','BR376','BR400','BR423','BR42
 Object.entries(window.BRIDGE_SURVEY_DATA).forEach(([code, record]) => {
   record.roofStatus = BRIDGE_ROOFED_FROM_REPORT.has(code) ? 'has' : 'none';
 });
-console.assert(Object.keys(window.BRIDGE_SURVEY_DATA).length === 40, 'Matched survey report data must contain 40 bridge records');
+console.assert(Object.keys(window.BRIDGE_SURVEY_DATA).length === 41, 'Matched survey report data must contain 41 bridge records');

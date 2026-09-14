@@ -39,7 +39,8 @@
     { id: 'work-metal-sheet-roof', code: '23', name: 'งานมุงหลังคา Metal Sheet อะลูซิงค์เคลือบสี หนา 0.47 มม.', unit: 'ตร.ม.', rate: 392, condition: 'roof', auto: null },
     { id: 'work-checker-plate', code: '24', name: 'งาน Checker Plate หนา 4.5 มม. รวมติดตั้งและรองพื้นกันสนิม', unit: 'ตร.ม.', rate: 1922, condition: 'steel', auto: null },
     // ponytail: source gives four thickness-specific Metal Rebuilding rates; keep one 1 mm working basis until a thickness selector is requested.
-    { id: 'work-metal-rebuilding-composite', code: '25', name: 'งานซ่อมคืนรูปผิวเหล็กด้วย Metal Rebuilding Composite', unit: 'ตร.ม.', rate: 23377, condition: 'steel', auto: null }
+    { id: 'work-metal-rebuilding-composite', code: '25', name: 'งานซ่อมคืนรูปผิวเหล็กด้วย Metal Rebuilding Composite', unit: 'ตร.ม.', rate: 23377, condition: 'steel', auto: null },
+    { id: 'work-rc-stair-construction', code: '26', name: 'งานก่อสร้างขั้นบันได ค.ส.ล', unit: 'ขั้น', rate: 1200, condition: 'all', auto: null }
   ];
   root.BRIDGE_WORK_CATALOG = Object.freeze(catalog);
   root.BRIDGE_WORK_BY_ID = Object.freeze(Object.fromEntries(catalog.map(item => [item.id, item])));

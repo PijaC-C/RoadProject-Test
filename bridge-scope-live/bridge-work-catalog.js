@@ -3,6 +3,7 @@
  * ราคาพื้นฐานจาก "ราคางานจัดซ่อมสะพานคนเดินข้ามถนน ประมาณก.pdf" (แผ่นที่ 1-2)
  * และราคาต่อหน่วยที่มีรายการตรงกันอัปเดตจาก
  * "สะพานลอยคนชุดที่ 2 6 เขต 27-8-2569.xlsx" แท็บ "ปร.4 ชุดที่2 7-9-69"
+ * รายการเพิ่มเติมอ้างอิง "boq_price_basis_investigated_2569.md"
  *
  * ปริมาณใน PDF เป็นยอดรวมของ 4 สะพาน ไม่ใช่ปริมาณรายรหัสสะพาน
  * จึงเก็บเฉพาะรายการ/หน่วย/ราคาต่อหน่วยไว้เป็นฐานให้ผู้สำรวจเลือกและกรอก
@@ -32,7 +33,13 @@
     { id: 'pdf-1.1.12.1', code: '17', name: 'รางน้ำฝนสแตนเลส ขนาด 4 นิ้ว ตะขอสแตนเลสแท้ พร้อมติดตั้ง', unit: 'ม.', rate: 700, condition: 'roof', auto: null },
     { id: 'pdf-1.1.12.2', code: '18', name: 'ท่อระบายน้ำฝนสังกะสี ขนาด 4 นิ้ว พร้อมติดตั้ง', unit: 'ม.', rate: 500, condition: 'roof', auto: null },
     { id: 'work-electrical-repair', code: '19', name: 'งานซ่อมระบบไฟฟ้า', unit: 'ม.', rate: 211, condition: 'all', auto: null },
-    { id: 'work-expansion-joint', code: '20', name: 'งานซ่อมรอยต่อสะพาน', unit: 'ม.', rate: 1328, condition: 'all', auto: null }
+    { id: 'work-expansion-joint', code: '20', name: 'งานซ่อมรอยต่อสะพาน', unit: 'ม.', rate: 1328, condition: 'all', auto: null },
+    { id: 'work-remove-tile', code: '21', name: 'งานรื้อถอนกระเบื้องทางเท้าเดิม พร้อมขนย้าย', unit: 'ตร.ม.', rate: 51, condition: 'all', auto: null },
+    { id: 'work-remove-wash-sand', code: '22', name: 'งานรื้อถอนพื้นผิวทรายล้างเดิม พร้อมขนย้าย', unit: 'ตร.ม.', rate: 51, condition: 'all', auto: null },
+    { id: 'work-metal-sheet-roof', code: '23', name: 'งานมุงหลังคา Metal Sheet อะลูซิงค์เคลือบสี หนา 0.47 มม.', unit: 'ตร.ม.', rate: 392, condition: 'roof', auto: null },
+    { id: 'work-checker-plate', code: '24', name: 'งาน Checker Plate หนา 4.5 มม. รวมติดตั้งและรองพื้นกันสนิม', unit: 'ตร.ม.', rate: 1922, condition: 'steel', auto: null },
+    // ponytail: source gives four thickness-specific Metal Rebuilding rates; keep one 1 mm working basis until a thickness selector is requested.
+    { id: 'work-metal-rebuilding-composite', code: '25', name: 'งานซ่อมคืนรูปผิวเหล็กด้วย Metal Rebuilding Composite', unit: 'ตร.ม.', rate: 23377, condition: 'steel', auto: null }
   ];
   root.BRIDGE_WORK_CATALOG = Object.freeze(catalog);
   root.BRIDGE_WORK_BY_ID = Object.freeze(Object.fromEntries(catalog.map(item => [item.id, item])));

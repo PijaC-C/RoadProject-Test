@@ -48,7 +48,7 @@ window.BRIDGE_SURVEY_DATA = {
 };
 // จากภาพถ่ายในรายงานตรวจสอบ: กลุ่มที่เห็นหลังคาคลุมทางเดินชัดเจน
 // รายการนี้เป็นค่าเริ่มต้นที่แก้ไขได้ในหน้าเครื่องคำนวณ ไม่ใช่ปริมาณงานจาก PDF ราคากลาง
-const BRIDGE_ROOFED_FROM_REPORT = new Set(['BR160','BR376','BR400','BR423','BR425']);
+const BRIDGE_ROOFED_FROM_REPORT = new Set(['BR160','BR376','BR400','BR423','BR425','BR741']);
 Object.entries(window.BRIDGE_SURVEY_DATA).forEach(([code, record]) => {
   record.roofStatus = BRIDGE_ROOFED_FROM_REPORT.has(code) ? 'has' : 'none';
 });

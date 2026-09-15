@@ -196,6 +196,16 @@
         .then(res => res.json())
         .then(rows => {
           // วาดข้อมูลบน map-summary
+          function escapeHTML(str) {
+            return String(str).replace(/[&<>"']/g, s => ({
+              '&': '&amp;',
+              '<': '&lt;',
+              '>': '&gt;',
+              '"': '&quot;',
+              "'": '&#39;'
+            })[s]);
+          }
+
           rows.forEach(row => {
             if (!row.polyline) return;
             try {
@@ -207,7 +217,9 @@
               } else {
                 shape = L.polyline(latlngs, { color: 'deeppink', weight: 5 });
               }
-              const popup = `<b>${row.project_name}</b><br>วงเงิน: ${row.budget}<br>ดำเนินการ: ${row.details}`;
+              const popup = `<b>${escapeHTML(row.project_name)}</b><br>` +
+                            `วงเงิน: ${escapeHTML(row.budget)}<br>` +
+                            `ดำเนินการ: ${escapeHTML(row.details)}`;
               shape.bindPopup(popup).addTo(mapSummary);
             } catch (e) {
               console.error('❌ ไม่สามารถ parse polyline ได้:', row.polyline);

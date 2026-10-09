@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>ระบบกำหนดเนื้องานซ่อมสะพานลอย • สำรวจครั้งที่ 2 ทาง 1</title>
+  <title>ระบบกำหนดเนื้องานซ่อมสะพานลอย</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     *{box-sizing:border-box}
     html,body{height:100%;margin:0;overflow:hidden;font-family:Tahoma,"Noto Sans Thai",sans-serif;background:#eef3f7;color:#172331}
     button,input,select,textarea{font:inherit}
-    .app{height:100%;height:100dvh;display:grid;grid-template-rows:62px 1fr}
+    .app{height:100%;height:100dvh;display:grid;grid-template-rows:62px 40px 1fr}
+    .round-tabs{display:flex;gap:8px;align-items:center;background:#e8f0f7;padding:4px 12px}.round-tabs a{color:#123f67;text-decoration:none;padding:5px 12px;border-radius:6px;font-size:13px}.round-tabs a[aria-current=page]{background:#123f67;color:#fff;font-weight:bold}.project-group{border-left:5px solid var(--project-color,#123f67);padding-left:7px}.project-group-title span:first-child{color:var(--project-color,#123f67);font-weight:bold}.card{border-left:4px solid var(--project-color,#123f67)}.baseline{padding:10px;border:1px solid #d8e2ea;border-radius:8px;margin:10px 0}.baseline summary{cursor:pointer;font-size:13px;color:#123f67}.round-coordinates{margin-top:10px}.round-note{font-size:11px;color:#64748b}.pin.saved-round4{outline:3px solid #14845b}
     .top{display:flex;align-items:center;gap:10px;padding:0 14px;background:#123f67;color:#fff}
     .top b{font-size:17px}.top small{display:block;color:#cfe1ef}.top .a{margin-left:auto;display:flex;gap:7px}
     .btn{border:0;border-radius:8px;padding:9px 11px;font-weight:700;cursor:pointer}.btn:disabled{opacity:.55;cursor:not-allowed}
@@ -37,6 +38,7 @@
     .summary-dialog{width:min(1120px,calc(100% - 24px));max-height:calc(100dvh - 24px)}.summary-body{padding:18px;max-height:calc(100dvh - 24px);overflow:auto}.summary-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.summary-head h2{margin:0;color:#123f67}.summary-head p{margin:4px 0 0;color:#64748b;font-size:12px}.summary-project{border:1px solid #d8e2ea;border-radius:10px;margin:9px 0;background:#fff;overflow:hidden}.summary-project>summary,.summary-bridge>summary{cursor:pointer;list-style-position:inside;padding:11px 13px}.summary-project>summary{display:flex;justify-content:space-between;gap:12px;align-items:baseline;background:#f3f7fa;color:#123f67;font-weight:700}.summary-project>summary span,.summary-bridge>summary span{color:#64748b;font-size:11px;font-weight:400;white-space:nowrap}.summary-bridges{padding:0 10px 8px}.summary-bridge{border-top:1px solid #e7edf1;margin:0}.summary-bridge>summary{display:flex;justify-content:space-between;gap:10px;color:#17324b}.summary-bridge>summary span{color:#123f67;font-weight:700}.summary-table{width:100%;min-width:760px;border-collapse:collapse;margin:0 0 10px;font-size:11px}.summary-bridge,.summary-special-body{overflow-x:auto}.summary-table th,.summary-table td{border:1px solid #d8e2ea;padding:6px;text-align:left;vertical-align:top}.summary-table th{background:#f7fafc;color:#526579}.summary-table .num{text-align:right;white-space:nowrap}.summary-total{display:flex;justify-content:flex-end;gap:12px;padding:7px 13px 10px;color:#123f67;font-weight:700}.summary-empty{padding:14px;color:#64748b;background:#f8fafc;border-radius:8px}.summary-status{font-size:11px;color:#805b1b}.summary-status.saved{color:#14845b}.summary-special{margin:8px 0 0;border:1px solid #ead9ae;border-radius:8px;background:#fffaf0;padding:9px}.summary-special>summary{cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:baseline;color:#805b1b;font-weight:700}.summary-special>summary span{font-size:11px;font-weight:400;color:#806b45;text-align:right}.summary-special h3{margin:0;color:#805b1b;font-size:13px}.summary-special p{margin:3px 0 8px;color:#806b45;font-size:11px}.summary-special .summary-table{margin-bottom:5px}.summary-special .summary-table th{background:#fff1ce;color:#805b1b}.summary-special-total{display:flex;justify-content:flex-end;color:#805b1b;font-weight:700;font-size:12px}
     @media(max-width:720px){.top{padding:0 8px;gap:6px}.top b{font-size:15px}.top small,.txt,.sync{display:none}.top .a{gap:4px}.main{display:block}.mapwrap{height:calc(100vh - 62px);height:calc(100dvh - 62px)}.side{position:absolute;z-index:900;left:0;top:62px;bottom:0;width:min(88vw,330px);transform:translateX(-103%);transition:.2s}.side.open{transform:none}.grid,.dialog-grid{grid-template-columns:1fr}.dialog-grid .wide{grid-column:auto}.calculator-shell{height:calc(100dvh - 300px);min-height:520px}.summary-dialog{width:calc(100% - 12px);max-height:calc(100dvh - 12px)}.summary-body{padding:12px;max-height:calc(100dvh - 12px)}.summary-head{align-items:stretch;flex-direction:column}.summary-head .btn{align-self:flex-end}.summary-project>summary,.summary-bridge>summary{padding:10px}.summary-project>summary span,.summary-bridge>summary span{white-space:normal;text-align:right}}
   </style>
+  <style>.main,.top{min-width:0}.top>div:first-child{min-width:0;flex:1}.top b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.top .a{flex-shrink:0}.tools{left:58px}@media(max-width:720px){.side{top:102px}.mapwrap{height:calc(100dvh - 102px)}}.baseline{overflow-x:auto}.project-group-title span:first-child{white-space:normal;flex:1;min-width:0}.summary-project>summary span:first-child{white-space:normal;flex:1}.summary-total{flex-wrap:wrap}</style>
 </head>
 <body>
   <div class="app">
@@ -50,6 +52,7 @@
         <button class="btn yellow" id="allPdf">PDF <span class="txt">ทั้งหมด</span></button>
       </div>
     </header>
+    <nav class="round-tabs" aria-label="รอบสำรวจ"><a id="round3Tab" href="./">สำรวจรอบ 3 (เดิม)</a><a id="round4Tab" href="?survey=4">งานสำรวจครั้งที่ 4</a></nav>
     <main class="main">
       <aside class="side" id="side">
         <div class="head">
@@ -75,6 +78,7 @@
             </div>
             <div class="field" style="margin-top:10px"><label for="overall">หมายเหตุเพิ่มเติม</label><textarea id="overall" rows="3"></textarea></div>
             <div class="issue" id="issue">-</div>
+            <div id="round4Info" hidden></div>
             <div class="calculator-shell"><iframe id="calcFrame" title="เครื่องคำนวณพื้นที่ผิวสะพาน"></iframe></div>
           </div>
           <div class="pf"><button class="btn nav" id="navigate" disabled>นำทาง</button><button class="btn pdf" id="onePdf">สรุป PDF</button><button class="btn save" id="save">บันทึก</button></div>
@@ -110,6 +114,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="bridge-work-catalog.js?v=20260915-3"></script>
+  <script src="survey-round4-data.js?v=20261009-1"></script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
@@ -126,6 +131,10 @@
     const firebaseApp = initializeApp(firebaseConfig);
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
+    const ROUND4=new URLSearchParams(location.search).get('survey')==='4';
+    const round4Data=window.BRIDGE_ROUND4_DATA;
+    document.getElementById(ROUND4?'round4Tab':'round3Tab').setAttribute('aria-current','page');
+    document.title+=' • สำรวจรอบ '+(ROUND4?'4':'3');
     // เฉพาะสะพานที่ยังไม่ได้สำรวจจากไฟล์ "สำรวจสะพานลอยทาง 1 2 งบ 2.2569.xlsx"
     // แหล่งข้อมูล: แท็บ "หมวด1 ทาง1" และ "หมวด2 ทาง1" โดยเลือกแถวที่คอลัมน์สถานะว่าง
     const D = [
@@ -217,6 +226,11 @@
       BR741:'งานจัดซ่อมสะพานคนเดินข้าม BR741 พื้นที่เขตหนองจอก'
     });
     D.forEach(b=>{b.project=PROJECT_BY_CODE[b.code]||''});
+    if(ROUND4){
+      if(!round4Data?.bridges?.length)throw new Error('โหลดข้อมูลสำรวจรอบ 4 ไม่สำเร็จ');
+      const original=new Map(D.map(b=>[b.code,b]));
+      D.splice(0,D.length,...round4Data.bridges.map(b=>({...original.get(b.code),...b,road:b.road||original.get(b.code)?.road||''})));
+    }
     console.assert(D.every(b=>b.project),'Every survey bridge must have a project name');
 
     const W = [
@@ -247,9 +261,26 @@
     function specialProjectRows(bridgeCount){const days=specialProjectDays(bridgeCount),ctx={bridgeCount,days};return SPECIAL_PROJECT_COSTS.map(item=>{const quantity=item.quantity(ctx),rate=Number(item.rate)||0,baseAmount=quantity*rate;return {...item,days,quantity,rate,factor:SPECIAL_FACTOR_F,adjustedRate:rate*SPECIAL_FACTOR_F,baseAmount,amount:baseAmount*SPECIAL_FACTOR_F,basis:item.basis(ctx)}})}
 
     // ใช้ namespace ใหม่เพื่อไม่ให้บันทึกและจุดเพิ่มจากแผนที่ชุดเดิมปะปนกับชุดยังไม่ได้สำรวจ
-    const K='bridge-survey-202609-records', CK='bridge-survey-202609-custom';
-    const RECORDS_COLLECTION='bridge_scope_records_v3';
-    const CUSTOM_COLLECTION='bridge_scope_custom_bridges_v3';
+    const K=ROUND4?'bridge-survey-round4-records':'bridge-survey-202609-records', CK=ROUND4?'bridge-survey-round4-custom':'bridge-survey-202609-custom';
+    const RECORDS_COLLECTION=ROUND4?'bridge_scope_round4_records':'bridge_scope_records_v3';
+    const CUSTOM_COLLECTION=ROUND4?'bridge_scope_round4_custom_bridges':'bridge_scope_custom_bridges_v3';
+    let legacyRecords={},legacyReady=!ROUND4;
+    const projectColors=new Map([...new Set(D.map(b=>b.project))].map((p,i)=>[p,`hsl(${(i*137.508)%360} 65% 34%)`]));
+    const projectColor=b=>ROUND4?(projectColors.get(b.project)||'#123f67'):'#123f67';
+    const hasCoordinates=b=>typeof b.lat==='number'&&typeof b.lng==='number'&&Number.isFinite(b.lat)&&Number.isFinite(b.lng);
+    const coordinateLabel=b=>hasCoordinates(b)?`${b.lat.toFixed(6)}, ${b.lng.toFixed(6)}`:'ยังไม่พบพิกัด — กรุณากรอกในการสำรวจ';
+    function baseline(code){
+      if(!ROUND4)return null;
+      if(round4Data.round2[code])return round4Data.round2[code];
+      const old=legacyRecords[code];
+      return old?{round:3,items:estimateRows(old),total:estimateTotal(old),record:old,source:'ฐานข้อมูลสำรวจรอบ 3 (อ่านอย่างเดียว)'}:null;
+    }
+    function effectiveRecord(code){
+      if(!ROUND4||R[code]?.updated)return R[code];
+      const old=baseline(code);
+      return old?{...(old.record||{}),calculator:{...(old.record?.calculator||{}),workItems:old.items},historical:true}:null;
+    }
+    function priceStatus(b){const r=R[b.code],old=baseline(b.code);return r?.updated?'บันทึกรอบ 4 · '+m(estimateTotal(r))+' บาท':old?'สำรวจรอบ '+old.round+' · '+m(old.total)+' บาท':b.priceSource==='way2'?'ราคาทาง 2 · ยังไม่มีราคารายสะพาน':b.priceSource==='round3'&&!legacyReady?'กำลังอ่านราคารอบ 3…':'ยังไม่สำรวจ · เปิดกรอกข้อมูลรอบ 4';}
     // Keep this in sync with the calculator's reset marker.  A mismatch here
     // causes the calculator to clear saved work-item ticks and quantities every
     // time a bridge is reopened from Firestore.
@@ -264,23 +295,23 @@
     const docId=s=>String(s).replace(/[^A-Za-z0-9_-]/g,'_');
     let map, marks=new Map();
 
-    console.assert(D.length===41,'Survey map dataset must contain 41 locations');
+    console.assert(D.length===(ROUND4?95:41),'Survey map dataset count mismatch');
 
     function toast(x){$('#toast').textContent=x;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),1600)}
     function setSyncStatus(x){$('#syncStatus').textContent=x;$('#syncStatus').title=x}
     function done(c){return !!R[c]?.updated}
-    function rec(c){return R[c]||(R[c]={date:t(),inspector:'',overall:'',items:{},calculator:null,workQuantityResetVersion:QUANTITY_RESET_VERSION})}
-    function icon(c){return L.divIcon({className:'',html:`<div class="pin ${done(c)?'done':''}"><span>${e(c)}</span></div>`,iconSize:[32,32],iconAnchor:[16,32]})}
-    function marker(b){let z=L.marker([b.lat,b.lng],{icon:icon(b.code)}).addTo(map).bindTooltip(`${e(b.code)} • ${e(b.name)}`);z.on('click',()=>openB(b.code));marks.set(b.code,z)}
+    function rec(c){if(R[c])return R[c];const old=baseline(c);return R[c]={date:t(),inspector:'',overall:old?.record?.overall||'',items:structuredClone(old?.record?.items||{}),calculator:structuredClone(old?.record?.calculator||null),workQuantityResetVersion:QUANTITY_RESET_VERSION};}
+    function icon(c){const b=B.find(b=>b.code===c);return L.divIcon({className:'',html:`<div class="pin ${done(c)?ROUND4?'saved-round4':'done':''}" ${ROUND4?`style="background:${projectColor(b)}"`:''}><span>${e(c)}</span></div>`,iconSize:[32,32],iconAnchor:[16,32]})}
+    function marker(b){if(!hasCoordinates(b))return;let z=L.marker([b.lat,b.lng],{icon:icon(b.code)}).addTo(map).bindTooltip(`${e(b.code)} • ${e(b.name)}`);z.on('click',()=>openB(b.code));marks.set(b.code,z)}
 
     function recordPayload(code,record){
       const calculator=record.calculator&&typeof record.calculator==='object'&&!Array.isArray(record.calculator)?record.calculator:{};
       const persistedCalculator=Number(record.workQuantityResetVersion)===QUANTITY_RESET_VERSION?{...calculator,quantityResetVersion:QUANTITY_RESET_VERSION}:calculator;
-      return {bridgeCode:code,date:record.date||t(),inspector:String(record.inspector||''),overall:String(record.overall||''),items:record.items||{},calculator:persistedCalculator,updated:record.updated||new Date().toISOString(),updatedBy:authUser.uid,updatedAt:serverTimestamp()};
+      return {bridgeCode:code,date:record.date||t(),inspector:String(record.inspector||''),overall:String(record.overall||''),items:record.items||{},calculator:persistedCalculator,updated:record.updated||new Date().toISOString(),updatedBy:authUser.uid,updatedAt:serverTimestamp(),...(ROUND4?{surveyRound:4,lat:record.lat??null,lng:record.lng??null,priceSource:baseline(code)?.round||null}:{})};
     }
     function normaliseRecord(data){
       const calculator=data.calculator&&typeof data.calculator==='object'&&!Array.isArray(data.calculator)?data.calculator:null;
-      return {date:data.date||t(),inspector:data.inspector||'',overall:data.overall||'',items:data.items||{},calculator,workQuantityResetVersion:Number(calculator?.quantityResetVersion)||0,updated:data.updated||''};
+      return {date:data.date||t(),inspector:data.inspector||'',overall:data.overall||'',items:data.items||{},calculator,workQuantityResetVersion:Number(calculator?.quantityResetVersion)||0,updated:data.updated||'',...(ROUND4?{lat:data.lat??null,lng:data.lng??null}:{})};
     }
     function subscribeRecords(){
       recordsUnsub?.();
@@ -289,12 +320,12 @@
           R={};localStorage.setItem(K,JSON.stringify(R));render();setSyncStatus('ฐานข้อมูลพร้อมใช้งาน');return;
         }
         let next={};snap.forEach(x=>{let d=x.data();if(d.bridgeCode)next[d.bridgeCode]=normaliseRecord(d)});
-        R=next;localStorage.setItem(K,JSON.stringify(R));render();if($('#summaryDialog')?.open)renderProjectSummary();setSyncStatus('ซิงก์ฐานข้อมูลแล้ว');
+        R=next;localStorage.setItem(K,JSON.stringify(R));if(ROUND4){B.forEach(b=>{if(hasCoordinates(next[b.code]||{})){b.lat=next[b.code].lat;b.lng=next[b.code].lng}});rebuildMarkers()}render();if($('#summaryDialog')?.open)renderProjectSummary();setSyncStatus('ซิงก์ฐานข้อมูลแล้ว');
       },err=>{console.error('Firestore records error',err);setSyncStatus('ฐานข้อมูลเชื่อมต่อไม่ได้')});
     }
     function rebuildMarkers(){
       marks.forEach(z=>z.remove());marks=new Map();B.forEach(marker);
-      if(B.length)map.fitBounds(L.latLngBounds(B.map(b=>[b.lat,b.lng])),{padding:[35,35]});
+      fitMap();
     }
     function subscribeCustomBridges(){
       customUnsub?.();
@@ -305,7 +336,7 @@
         if(map)rebuildMarkers();renderDistricts();render();if($('#summaryDialog')?.open)renderProjectSummary();
       },err=>console.error('Firestore custom bridges error',err));
     }
-    function startDataSync(){subscribeRecords();subscribeCustomBridges()}
+    function startDataSync(){subscribeRecords();subscribeCustomBridges();if(ROUND4)onSnapshot(collection(db,'bridge_scope_records_v3'),snap=>{legacyRecords=Object.fromEntries(snap.docs.map(x=>[x.id,normaliseRecord(x.data())]));legacyReady=true;render();if($('#summaryDialog')?.open)renderProjectSummary()},err=>{console.error('อ่านข้อมูลรอบ 3 ไม่สำเร็จ',err);setSyncStatus('อ่านข้อมูลรอบ 3 ไม่สำเร็จ')})}
 
     const projectLabel=b=>b.project||'สะพานที่เพิ่มเอง';
 
@@ -314,11 +345,13 @@
       let visible=B.filter(b=>(!q||`${b.code} ${b.name} ${b.road}`.toLowerCase().includes(q))&&(!d||b.district===d)&&(!p||projectLabel(b)===p));
       let groups=new Map();
       visible.forEach(b=>{let key=projectLabel(b);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(b)});
-      $('#list').innerHTML=groups.size?[...groups].map(([project,bridges])=>`<section class="project-group"><h3 class="project-group-title"><span>${e(project)}</span><span>${bridges.length} สะพาน</span></h3>${bridges.map(b=>`<div class="card ${sel===b.code?'on':''}" data-c="${e(b.code)}"><b>${e(b.code)}</b><h3>${e(b.name)}</h3><p>เขต${e(b.district)} • ถนน${e(b.road)}</p></div>`).join('')}</section>`).join(''):'<p class="hint">ไม่พบสะพานตามตัวกรอง</p>';
+      $('#list').innerHTML=groups.size?[...groups].map(([project,bridges])=>`<section class="project-group" style="--project-color:${projectColor(bridges[0])}"><h3 class="project-group-title"><span>${e(project)}</span><span>${bridges.length} สะพาน</span></h3>${bridges.map(b=>`<div class="card ${sel===b.code?'on':''}" data-c="${e(b.code)}"><b>${e(b.code)}</b><h3>${e(b.name)}</h3><p>เขต${e(b.district)} • ${e(b.road)}</p>${ROUND4?`<p>${e(priceStatus(b))}</p>${hasCoordinates(b)?'':'<p>รอกรอกพิกัด</p>'}`:''}</div>`).join('')}</section>`).join(''):'<p class="hint">ไม่พบสะพานตามตัวกรอง</p>';
+      const visibleCodes=new Set(visible.map(b=>b.code));marks.forEach((z,c)=>{if(visibleCodes.has(c)){if(!map.hasLayer(z))z.addTo(map)}else z.remove()});
       document.querySelectorAll('.card').forEach(x=>x.onclick=()=>openB(x.dataset.c));
       $('#ma').textContent=B.length;
       $('#md').textContent=B.filter(b=>done(b.code)).length;
-      $('#mi').textContent=B.reduce((s,b)=>s+Object.values(R[b.code]?.items||{}).filter(x=>x.sel).length,0);
+      $('#mi').textContent=ROUND4?B.filter(b=>baseline(b.code)).length:B.reduce((s,b)=>s+Object.values(R[b.code]?.items||{}).filter(x=>x.sel).length,0);
+      if(ROUND4){$('#md').nextElementSibling.textContent='บันทึกรอบ 4';$('#mi').nextElementSibling.textContent='มีราคาเดิม'}
     }
 
     function renderDistricts(){
@@ -330,20 +363,22 @@
     }
 
     function openB(c){
+      if(ROUND4&&B.find(b=>b.code===c)?.priceSource==='round3'&&!legacyReady){toast('รออ่านข้อมูลรอบ 3 ก่อนเปิดสำรวจ');return}
       let b=B.find(x=>x.code===c), r=rec(c);
       sel=c;
       calcBridgeCode=c;
       $('#side').classList.remove('open');
       $('#name').textContent=b.name;
       $('#sub').textContent=`${b.code} • ${projectLabel(b)} • เขต${b.district} • ถนน${b.road}`;
-      $('#navigate').disabled=false;
+      $('#navigate').disabled=!hasCoordinates(b);
       $('#date').value=r.date||t();
       $('#inspector').value=r.inspector||'';
       $('#overall').value=r.overall||'';
       $('#issue').textContent=b.issue||'สภาพชำรุดตามบัญชีสำรวจ';
+      if(ROUND4){const old=baseline(c),host=$('#round4Info');host.hidden=false;host.innerHTML='<p class="round-note">บันทึกเฉพาะรอบ 4 — ไม่แก้ข้อมูลรอบ 2/3</p><b>'+e(priceStatus(b))+'</b>'+(old?'<details class="baseline"><summary>เนื้องานและราคาเดิม · รอบ '+old.round+'</summary><p class="round-note">'+e(old.source)+' · คงราคาตามต้นฉบับ</p>'+summaryTableHtml(old.items)+'</details>':'')+'<div class="grid round-coordinates"><div class="field"><label for="surveyLat">ละติจูด</label><input id="surveyLat" type="number" step="any" min="-90" max="90" value="'+(b.lat??'')+'"></div><div class="field"><label for="surveyLng">ลองจิจูด</label><input id="surveyLng" type="number" step="any" min="-180" max="180" value="'+(b.lng??'')+'"></div></div>'}
       loadCalculatorForBridge(c);
       $('#panel').classList.add('open');
-      map.setView([b.lat,b.lng],15);
+      if(hasCoordinates(b))map.setView([b.lat,b.lng],15);
       render();
     }
 
@@ -354,7 +389,7 @@
         let item=W.find(y=>y.id===x.dataset.i);
         items[item.id]={sel:x.querySelector('input[type=checkbox]').checked,qty:Number(x.querySelector('.qty').value)||0,unit:x.querySelector('.unit').value||item.unit,note:x.querySelector('.note input').value};
       });
-      return {date:$('#date').value||t(),inspector:$('#inspector').value,overall:$('#overall').value,items,calculator:old.calculator||null,workQuantityResetVersion:old.workQuantityResetVersion===undefined?QUANTITY_RESET_VERSION:Number(old.workQuantityResetVersion)||0,updated:mark?new Date().toISOString():(old.updated||'')};
+      return {date:$('#date').value||t(),inspector:$('#inspector').value,overall:$('#overall').value,items,calculator:old.calculator||null,workQuantityResetVersion:old.workQuantityResetVersion===undefined?QUANTITY_RESET_VERSION:Number(old.workQuantityResetVersion)||0,updated:mark?new Date().toISOString():(old.updated||''),...(ROUND4?{lat:$('#surveyLat').value===''?null:Number($('#surveyLat').value),lng:$('#surveyLng').value===''?null:Number($('#surveyLng').value)}:{})};
     }
 
     function sum(r){return W.reduce((s,i)=>{let v=r.items?.[i.id];return s+(v?.sel?(v.qty||0)*i.price:0)},0)}
@@ -364,6 +399,7 @@
     }
     async function save({fromCalculator=false}={}){
       if(!sel)return;
+      if(ROUND4){const r=collectRecord();if((r.lat===null)!==(r.lng===null)||r.lat!==null&&(!hasCoordinates(r)||Math.abs(r.lat)>90||Math.abs(r.lng)>180)){toast('กรุณากรอกพิกัดทั้งสองช่องให้ถูกต้อง');return}if(hasCoordinates(r)){const b=B.find(b=>b.code===sel);b.lat=r.lat;b.lng=r.lng;if(!marks.has(sel))marker(b);else marks.get(sel).setLatLng([r.lat,r.lng])}}
       R[sel]=collectRecord(true);localStorage.setItem(K,JSON.stringify(R));marks.get(sel)?.setIcon(icon(sel));render();
       if(!fromCalculator&&calculatorFrameReady()){
         // Let the calculator return its current work-scope state first.  The
@@ -389,9 +425,9 @@
 
     function calculatorWorkRows(r){
       const removedCodes=new Set(['1.1.13.1','1.1.13.2','1.1.13.3']);
-      return Array.isArray(r?.calculator?.workItems) ? r.calculator.workItems.filter(x=>x&&!removedCodes.has(String(x.code||''))&&Number(x.quantity)>=0).map(x=>{const quantity=Number(x.quantity)||0,rate=Number(x.rate)||0;return {...x,quantity,rate,amount:quantity*rate}}) : null;
+      return Array.isArray(r?.calculator?.workItems) ? r.calculator.workItems.filter(x=>x&&!removedCodes.has(String(x.code||''))&&Number(x.quantity)>=0).map(x=>{const quantity=Number(x.quantity)||0,rate=Number(x.rate)||0;return {...x,quantity,rate,amount:ROUND4&&Number.isFinite(x.amount)?x.amount:undefined}}) : null;
     }
-    function factorWorkRow(row){const quantity=Number(row.quantity)||0,rate=Number(row.rate)||0;return {...row,quantity,rate,factor:WORK_FACTOR_F,adjustedRate:rate*WORK_FACTOR_F,baseAmount:quantity*rate,amount:quantity*rate*WORK_FACTOR_F};}
+    function factorWorkRow(row){const quantity=Number(row.quantity)||0,rate=Number(row.rate)||0,factor=ROUND4&&Number.isFinite(Number(row.factor))&&Number(row.factor)>0?Number(row.factor):WORK_FACTOR_F;return {...row,quantity,rate,factor,adjustedRate:rate*factor,baseAmount:quantity*rate,amount:ROUND4&&Number.isFinite(row.amount)?row.amount:quantity*rate*factor};}
     function estimateRows(r){
       const calcRows=calculatorWorkRows(r);
       if(Array.isArray(calcRows))return calcRows.map(factorWorkRow);
@@ -406,21 +442,21 @@
       const groups=new Map();B.forEach(b=>{const key=projectLabel(b);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(b)});
       let bridgeCount=0,savedCount=0,grandTotal=0;
       const projectHtml=[...groups].sort((a,b)=>a[0].localeCompare(b[0],'th')).map(([project,bridges])=>{
-        const saved=bridges.filter(b=>R[b.code]?.updated),bridgeTotal=saved.reduce((sum,b)=>sum+estimateTotal(R[b.code]),0),specialRows=specialProjectRows(bridges.length),specialTotal=specialRows.reduce((sum,row)=>sum+row.amount,0),total=bridgeTotal+specialTotal;bridgeCount+=bridges.length;savedCount+=saved.length;grandTotal+=total;
+        const saved=bridges.filter(b=>R[b.code]?.updated||ROUND4&&baseline(b.code)),bridgeTotal=saved.reduce((sum,b)=>sum+(ROUND4&&!R[b.code]?.updated?baseline(b.code).total:estimateTotal(R[b.code])),0),specialRows=specialProjectRows(bridges.length),specialTotal=specialRows.reduce((sum,row)=>sum+row.amount,0),total=bridgeTotal+specialTotal;bridgeCount+=bridges.length;savedCount+=saved.length;grandTotal+=total;
         const bridgeHtml=bridges.slice().sort((a,b)=>a.code.localeCompare(b.code,'en',{numeric:true})).map(b=>{
-          const r=R[b.code],isSaved=!!r?.updated,total=isSaved?estimateTotal(r):0,rows=isSaved?estimateRows(r):[];
+          const r=effectiveRecord(b.code),old=baseline(b.code),isSaved=!!r?.updated||!!old,total=ROUND4&&!R[b.code]?.updated&&old?old.total:isSaved?estimateTotal(r):0,rows=isSaved?ROUND4&&!R[b.code]?.updated&&old?old.items:estimateRows(r):[];
           const detail=rows.length?summaryTableHtml(rows):('<p class="summary-empty">'+(isSaved?'ยังไม่ได้เลือกเนื้องาน':'ยังไม่ได้บันทึกข้อมูล')+'</p>');
-          return '<details class="summary-bridge"><summary><span>'+e(b.code)+' · '+e(b.name)+'</span><span class="'+(isSaved?'':'summary-status')+'">'+(isSaved?m(total)+' บาท':'ยังไม่บันทึก')+'</span></summary>'+(isSaved?detail:'<p class="summary-empty">เปิดสะพานนี้เพื่อกรอกและบันทึกข้อมูล</p>')+'</details>';
+          return '<details class="summary-bridge"><summary><span>'+e(b.code)+' · '+e(b.name)+'</span><span class="'+(isSaved?'':'summary-status')+'">'+(ROUND4?e(priceStatus(b)):isSaved?m(total)+' บาท':'ยังไม่บันทึก')+'</span></summary>'+(isSaved?detail:'<p class="summary-empty">เปิดสะพานนี้เพื่อกรอกและบันทึกข้อมูล</p>')+'</details>';
         }).join('');
         const specialHtml='<details class="summary-special"><summary><span>ค่าใช้จ่ายพิเศษ</span><span>'+bridges.length+' สะพาน · '+specialRows[0].days+' วัน · Factor F 1.0000 · รวม '+m(specialTotal)+' บาท</span></summary><div class="summary-special-body"><p>'+bridges.length+' สะพาน · ระยะเวลาดำเนินงาน '+specialRows[0].days+' วัน · Factor F ค่าใช้จ่ายพิเศษ = 1.0000 · คิดครั้งเดียวต่อโครงการ</p>'+summaryTableHtml(specialRows)+'</div></details>';
-        return '<details class="summary-project"><summary><span>'+e(project)+'</span><span>'+saved.length+'/'+bridges.length+' สะพาน · รวม '+m(total)+' บาท</span></summary><div class="summary-bridges">'+bridgeHtml+specialHtml+'</div></details>';
+        return '<details class="summary-project" style="border-left:5px solid '+projectColor(bridges[0])+'"><summary><span>'+e(project)+'</span><span>'+saved.length+'/'+bridges.length+' สะพานมีราคา · '+(ROUND4&&saved.length<bridges.length?'รวมเฉพาะที่มีราคา ':'รวม ')+m(total)+' บาท</span></summary><div class="summary-bridges">'+bridgeHtml+specialHtml+'</div></details>';
       }).join('');
-      host.innerHTML='<div class="summary-total"><span>'+savedCount+'/'+bridgeCount+' สะพานมีข้อมูล</span><span>รวมทั้งหมดหลัง Factor F '+m(grandTotal)+' บาท</span></div>'+projectHtml;
+      host.innerHTML=(ROUND4?'<p class="round-note">ราคาเดิมคง Factor F ตามแหล่งข้อมูล · รวมค่าใช้จ่ายพิเศษครั้งเดียวต่อโครงการ · ไม่รวมสะพานที่ยังไม่มีราคารายสะพาน/ราคาทาง 2</p>':'')+'<div class="summary-total"><span>'+savedCount+'/'+bridgeCount+' สะพานมีราคา</span><span>'+(ROUND4?'รวมเฉพาะราคาที่มี ':'รวมทั้งหมดหลัง Factor F ')+m(grandTotal)+' บาท</span></div>'+projectHtml;
     }
     function reportPage(b,r){
       const rowsData=estimateRows(r),rows=rowsData.length?rowsData.map(v=>`<tr><td>${e(v.name||'-')}</td><td>${m(v.quantity)}</td><td>${e(v.unit||'-')}</td><td>${m(v.rate)}</td><td>${Number(v.factor).toFixed(4)}</td><td>${m(v.adjustedRate)}</td><td>${m(v.amount)}</td></tr>`).join(''):'<tr><td colspan="7">ยังไม่ได้เลือกเนื้องาน</td></tr>';
       const total=estimateTotal(r);
-      return `<section class="p"><h1>สรุปเนื้องานซ่อมสะพานลอยคนเดิน (ก่อน/หลัง Factor F)</h1><h2>${e(b.code)} • ${e(b.name)}</h2><p>เขต${e(b.district)} • ถนน${e(b.road)} • ${b.lat.toFixed(6)}, ${b.lng.toFixed(6)}</p><table><tr><th>รายการ</th><th>ปริมาณ</th><th>หน่วย</th><th>ราคาต่อหน่วย</th><th>Factor F</th><th>ราคาหลัง Factor F</th><th>จำนวนเงิน</th></tr>${rows}</table><h3>รวมประมาณการหลัง Factor F ${m(total)} บาท</h3></section>`;
+      return `<section class="p"><h1>สรุปเนื้องานซ่อมสะพานลอยคนเดิน (ก่อน/หลัง Factor F)</h1><h2>${e(b.code)} • ${e(b.name)}</h2><p>เขต${e(b.district)} • ถนน${e(b.road)} • ${e(coordinateLabel(b))}</p><table><tr><th>รายการ</th><th>ปริมาณ</th><th>หน่วย</th><th>ราคาต่อหน่วย</th><th>Factor F</th><th>ราคาหลัง Factor F</th><th>จำนวนเงิน</th></tr>${rows}</table><h3>รวมประมาณการหลัง Factor F ${m(total)} บาท</h3></section>`;
     }
 
     function pdf(codes){
@@ -439,8 +475,8 @@
       let frame=$('#calcFrame');
       calcBridgeCode=code;
       calcFrameLoaded=false;
-      frame.onload=()=>{calcFrameLoaded=true;frame.contentWindow?.postMessage({type:'bridge-paint-load-state',bridgeCode:code,state:R[code]?.calculator||null},location.origin)};
-      frame.src='bridge-paint-calculator.html?database=202609&bridge='+encodeURIComponent(code);
+      frame.onload=()=>{calcFrameLoaded=true;frame.contentWindow?.postMessage({type:'bridge-paint-load-state',bridgeCode:code,state:R[code]?.calculator||null,...(ROUND4&&!R[code]?.calculator&&round4Data.round2[code]?{importItems:round4Data.round2[code].items}:{})},location.origin)};
+      frame.src='bridge-paint-calculator.html?v=20261009-1&database='+(ROUND4?'round4':'202609')+'&bridge='+encodeURIComponent(code);
     }
     async function applyCalculatorResult(data){
       let code=data.bridgeCode;
@@ -487,14 +523,15 @@
     map=L.map('map').setView([13.82,100.68],11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
     B.forEach(marker);
-    map.fitBounds(L.latLngBounds(B.map(b=>[b.lat,b.lng])),{padding:[35,35]});
+    function fitMap(){const points=B.filter(hasCoordinates);if(points.length)map.fitBounds(L.latLngBounds(points.map(b=>[b.lat,b.lng])),{padding:[35,35]})}
+    fitMap();
 
     $('#q').oninput=render;
     $('#district').onchange=render;
     $('#project').onchange=render;
     $('#menu').onclick=()=>$('#side').classList.toggle('open');
     $('#close').onclick=()=>{$('#panel').classList.remove('open');calcFrameLoaded=false;$('#calcFrame').src='about:blank';calcBridgeCode=null};
-    $('#fit').onclick=()=>map.fitBounds(L.latLngBounds(B.map(b=>[b.lat,b.lng])),{padding:[35,35]});
+    $('#fit').onclick=fitMap;
     $('#add').onclick=()=>$('#addDialog').showModal();
     $('#cancelAdd').onclick=()=>$('#addDialog').close();
     $('#pickMap').onclick=()=>{
@@ -509,11 +546,11 @@
       if(await addBridge(values.name,values.district,values.road,lat,lng))$('#addDialog').close();
     };
     $('#navigate').onclick=()=>{
-      let b=B.find(x=>x.code===sel);if(!b)return;
+      let b=B.find(x=>x.code===sel);if(!b||!hasCoordinates(b))return;
       window.open(`https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}&travelmode=driving`,'_blank','noopener,noreferrer');
     };
     $('#save').onclick=save;
-    $('#onePdf').onclick=()=>{save();pdf([sel])};
+    $('#onePdf').onclick=()=>pdf([sel]);
     $('#allPdf').onclick=()=>pdf(B.map(b=>b.code));
     $('#projectSummary').onclick=()=>{renderProjectSummary();$('#summaryDialog').showModal()};
     $('#closeSummary').onclick=()=>$('#summaryDialog').close();

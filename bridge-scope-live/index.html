@@ -46,6 +46,10 @@
     button.card{display:block;width:100%;text-align:left;background:#fff;border:1px solid #d9e4ef;border-left:3px solid var(--project-color);padding:11px;box-shadow:0 2px 7px #183f6306;transition:border-color .15s,box-shadow .15s}.card:focus-visible{outline:3px solid #83b5dc;outline-offset:2px}.card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}.card b{font-size:13px}.bridge-name{display:block;font-size:13px;font-weight:bold;line-height:1.6;color:#223c54}.bridge-location,.bridge-price{display:block;font-size:11px;color:#687c90;line-height:1.5;margin-top:4px}.bridge-price{color:#245b7e;background:#f1f6fa;padding:5px 7px;border-radius:5px}.survey-badge{font-size:10px;border-radius:12px;padding:3px 7px;font-weight:normal;white-space:nowrap}.has-data{background:#eaf5ef;color:#24714d}.needs-survey{background:#fff2d9;color:#82590e}.coordinate-pending{display:inline-block;font-size:10px;color:#856126;margin-top:5px}.empty-state{padding:24px 10px;text-align:center;color:#62758a;font-size:12px}.empty-state p{font-size:11px;line-height:1.6}.pf{box-shadow:0 -3px 12px #123f670a;align-items:center;background:#fff}#saveStatus{font-size:11px;color:#42617c;margin-right:auto}.top{background:linear-gradient(110deg,#123f67,#20567f)}
     @media(max-width:720px){.main{display:block}.side{width:min(94vw,390px)}.head{padding:10px}.project-checks{max-height:180px}.list{padding:8px}.pf{padding:8px 10px}#saveStatus{flex-basis:100%;margin-bottom:3px}.card-head{margin-bottom:5px}}
   </style>
+<style>
+  .main{grid-template-columns:clamp(280px,30vw,390px) minmax(0,1fr)}.head,.ph,.pf{flex-shrink:0}.list{flex:1;min-height:0;scrollbar-gutter:stable}.pb{scrollbar-gutter:stable}.ph>div{min-width:0}.ph .x{flex-shrink:0}.project-picker{position:relative}.project-options{position:absolute;z-index:10;top:100%;left:-1px;right:-1px;background:#fff;border:1px solid #d7e4ef;border-radius:0 0 9px 9px;box-shadow:0 8px 20px #123f6726}.project-checks{max-height:min(220px,calc(100dvh - 440px))}.pf #saveStatus{flex-basis:100%;min-height:16px;margin:0}.panel{transition:transform .2s}.side{transition:transform .2s}
+  @media(max-width:720px){.project-checks{max-height:min(180px,calc(100dvh - 440px))}.head{max-height:calc(100% - 100px)}.ph{max-height:35%;overflow:auto}.top .btn{min-height:40px}}
+</style>
 </head>
 <body>
   <div class="app">
@@ -70,7 +74,7 @@
           </div>
           <div class="filter"><input id="q" placeholder="ค้นหาชื่อ/รหัส"><select id="district"><option value="">ทุกเขต</option></select></div>
           <label class="missing-filter" id="missingFilter"><input type="checkbox" id="missingOnly"><span>เฉพาะสะพานที่ไม่มีข้อมูลสำรวจ<small>ไม่มีข้อมูลรอบก่อน และยังไม่บันทึกรอบ 4</small></span></label>
-          <details class="project-picker" id="projectPicker"><summary>เลือกโครงการ <span id="projectSelectionCount"></span></summary><div class="project-picker-tools"><label><input type="checkbox" id="allProjects" checked> ทุกโครงการ</label><button type="button" id="clearProjects">ไม่เลือกทั้งหมด</button></div><div id="projectChecks" class="project-checks"></div></details>
+          <details class="project-picker" id="projectPicker"><summary>เลือกโครงการ <span id="projectSelectionCount"></span></summary><div class="project-options"><div class="project-picker-tools"><label><input type="checkbox" id="allProjects" checked> ทุกโครงการ</label><button type="button" id="clearProjects">ไม่เลือกทั้งหมด</button></div><div id="projectChecks" class="project-checks"></div></div></details>
           <div class="filter-result" id="filterResult" role="status" aria-live="polite"></div>
         </div>
         <div class="list" id="list"></div>
@@ -387,6 +391,7 @@
       if(ROUND4&&B.find(b=>b.code===c)?.priceSource==='round3'&&!legacyReady){toast('รออ่านข้อมูลรอบ 3 ก่อนเปิดสำรวจ');return}
       let b=B.find(x=>x.code===c), r=rec(c);
       sel=c;
+      $('.pb').scrollTop=0;
       calcBridgeCode=c;
       $('#save').disabled=true;$('#saveStatus').textContent='กำลังโหลดแบบสำรวจ…';
       $('#side').classList.remove('open');

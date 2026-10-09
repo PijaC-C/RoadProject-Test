@@ -32,4 +32,16 @@ assert.match(source,/ROUND4\?'bridge_scope_round4_records':'bridge_scope_records
 assert.match(source,/ROUND4\?'bridge-survey-round4-records':'bridge-survey-202609-records'/);
 const calculator=fs.readFileSync(path.join(root,'bridge-paint-calculator.html'),'utf8');
 assert.match(calculator,/ROUND4_CALC\?'bridge-survey-round4-calculator-':'bridge-survey-202609-calculator-'/);
+const savedCodes=new Set(),knownCodes=new Set();
+context.done=code=>savedCodes.has(code);context.baseline=code=>knownCodes.has(code)?{}:null;
+vm.runInContext("const projectLabel=b=>b.project||'สะพานที่เพิ่มเอง';"+source.slice(source.indexOf('const hasSurveyData='),source.indexOf('function renderProjectSelection()')),context);
+const filter=context.matchesFilters,b={code:'BR004',name:'สะพาน ทดสอบ',road:'ทดสอบ',district:'จตุจักร',project:'โครงการ ก',priceSource:'pending'};
+assert.equal(filter(b,'','',true,new Set(['โครงการ ก'])),true);
+assert.equal(filter(b,'','',true,new Set()),false,'No selected projects means no results');
+assert.equal(filter(b,'','',true,new Set(['โครงการ ข'])),false);
+assert.equal(filter(b,'br004','จตุจักร',true,new Set(['โครงการ ก','โครงการ ข'])),true);
+assert.equal(filter(b,'not found','',false,new Set(['โครงการ ก'])),false);
+assert.equal(filter({...b,priceSource:'way2'},'','',true,new Set(['โครงการ ก'])),false,'Way2 survey data is not missing');
+savedCodes.add(b.code);assert.equal(filter(b,'','',true,new Set(['โครงการ ก'])),false);savedCodes.clear();
+knownCodes.add(b.code);assert.equal(filter(b,'','',true,new Set(['โครงการ ก'])),false);
 console.log('PASS round4 dataset, BR/project uniqueness, provenance, item mapping, price factors/rounding/zero, isolated database and browser storage namespaces.');

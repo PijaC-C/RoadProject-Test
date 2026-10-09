@@ -15,6 +15,8 @@ const assert=require('node:assert/strict');
   const options=await page.locator('.project-options').boundingBox();assert.ok(options.y+options.height<=height,'Project options outside viewport');
   await page.locator('#projectPicker summary').click();await page.locator('#q').fill('BR742');await page.locator('[data-c="BR742"]').click();
   const frame=page.frameLocator('#calcFrame');await frame.locator('.scope-check').first().waitFor();await page.waitForTimeout(250);
+  const overflow=await frame.locator('.scope-table').evaluate(table=>[...table.querySelectorAll('.scope-qty,.scope-note')].filter(input=>{const r=input.getBoundingClientRect(),cell=input.closest('td').getBoundingClientRect();return r.left<cell.left||r.right>cell.right}).map(input=>input.dataset.workQuantity||input.dataset.workNote));
+  assert.deepEqual(overflow,[],'Quantity/note inputs overlap adjacent table cells');
   const footer=await page.locator('.pf').boundingBox();
   await page.locator('#saveStatus').evaluate(el=>el.textContent='กำลังโหลดแบบสำรวจ…');
   assert.deepEqual(await page.locator('.pf').boundingBox(),footer,'Save status shifts footer');

@@ -9,6 +9,14 @@ const assert=require('node:assert/strict');
   await page.goto(process.env.APP_URL||'http://127.0.0.1:4173/bridge-scope-live/?survey=4');
   await page.waitForFunction(()=>document.querySelector('#mi').textContent==='53');
   if(width<=720){await page.locator('#menu').click();await page.waitForTimeout(250)}
+  const expectedPending=['BR004','BR008','BR010','BR030','BR040','BR150','BR151','BR152','BR153','BR156','BR272','BR279','BR291','BR292','BR342','BR345','BR706','BR739','BR740','BR742','BR743','BR744','BR745','BR746','BR747','BR748','BR749','BR758','BR759'];
+  await page.locator('#district').selectOption({label:'หนองจอก'});await page.locator('#q').fill('BR152');
+  await page.locator('#projectPicker summary').click();await page.locator('#clearProjects').click();await page.locator('#projectPicker summary').click();
+  await page.locator('#missingOnly').check();
+  assert.deepEqual((await page.locator('.card').evaluateAll(cards=>cards.map(c=>c.dataset.c))).sort(),expectedPending,'Missing-only should reset stale filters and include every pending bridge');
+  assert.equal(await page.locator('.leaflet-marker-icon').count(),17);assert.equal(await page.locator('.coordinate-pending').count(),12);
+  assert.match(await page.locator('#filterResult').innerText(),/29 \/ 95.*17 หมุด.*รอพิกัด 12/);
+  await page.locator('#missingOnly').uncheck();
   const listBefore=await page.locator('#list').boundingBox();
   await page.locator('#projectPicker summary').click();
   assert.deepEqual(await page.locator('#list').boundingBox(),listBefore,'Project picker shifts list');

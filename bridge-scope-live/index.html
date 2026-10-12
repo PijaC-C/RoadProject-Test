@@ -73,7 +73,7 @@
             <div class="m"><b id="mi">0</b><span>รายการงาน</span></div>
           </div>
           <div class="filter"><input id="q" placeholder="ค้นหาชื่อ/รหัส"><select id="district"><option value="">ทุกเขต</option></select></div>
-          <label class="missing-filter" id="missingFilter"><input type="checkbox" id="missingOnly"><span>เฉพาะสะพานที่ไม่มีข้อมูลสำรวจ<small>ไม่มีข้อมูลรอบก่อน และยังไม่บันทึกรอบ 4</small></span></label>
+          <label class="missing-filter" id="missingFilter"><input type="checkbox" id="missingOnly"><span>เฉพาะสะพานที่ไม่มีข้อมูลสำรวจ<small>เปิดแล้วแสดงทุกโครงการ · ไม่ซ่อนสะพานที่ยังไม่มีพิกัด</small></span></label>
           <details class="project-picker" id="projectPicker"><summary>เลือกโครงการ <span id="projectSelectionCount"></span></summary><div class="project-options"><div class="project-picker-tools"><label><input type="checkbox" id="allProjects" checked> ทุกโครงการ</label><button type="button" id="clearProjects">ไม่เลือกทั้งหมด</button></div><div id="projectChecks" class="project-checks"></div></div></details>
           <div class="filter-result" id="filterResult" role="status" aria-live="polite"></div>
         </div>
@@ -362,7 +362,8 @@
       let q=$('#q').value.trim().toLowerCase(), d=$('#district').value, missingOnly=ROUND4&&$('#missingOnly').checked;
       $('#missingOnly').disabled=ROUND4&&!legacyReady;
       let visible=B.filter(b=>matchesFilters(b,q,d,missingOnly,selectedProjects||new Set(B.map(projectLabel))));
-      $('#filterResult').textContent=missingOnly&&!legacyReady?'กำลังตรวจข้อมูลสำรวจเดิม…':`แสดง ${visible.length} / ${B.length} สะพาน · ${new Set(visible.map(projectLabel)).size} โครงการ`;
+      const mapped=visible.filter(hasCoordinates).length;
+      $('#filterResult').textContent=missingOnly&&!legacyReady?'กำลังตรวจข้อมูลสำรวจเดิม…':`แสดง ${visible.length} / ${B.length} สะพาน · ${new Set(visible.map(projectLabel)).size} โครงการ · ${mapped} หมุด${mapped<visible.length?` · รอพิกัด ${visible.length-mapped} สะพาน`:''}`;
       renderProjectSelection();
       let groups=new Map();
       visible.forEach(b=>{let key=projectLabel(b);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(b)});
@@ -559,7 +560,7 @@
 
     $('#q').oninput=render;
     $('#district').onchange=render;
-    $('#missingOnly').onchange=render;
+    $('#missingOnly').onchange=()=>{if($('#missingOnly').checked){$('#q').value='';$('#district').value='';selectedProjects=new Set(B.map(projectLabel));document.querySelectorAll('.project-check').forEach(x=>x.checked=true);$('#list').scrollTop=0;}render()};
     $('#allProjects').onchange=()=>{const checked=$('#allProjects').checked;selectedProjects=new Set(checked?B.map(projectLabel):[]);document.querySelectorAll('.project-check').forEach(x=>x.checked=checked);render()};
     $('#clearProjects').onclick=()=>{selectedProjects.clear();document.querySelectorAll('.project-check').forEach(x=>x.checked=false);render()};
     $('#menu').onclick=()=>$('#side').classList.toggle('open');

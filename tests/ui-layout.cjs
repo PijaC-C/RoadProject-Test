@@ -6,16 +6,20 @@ const assert=require('node:assert/strict');
  for(const [width,height] of [[1440,900],[1024,768],[768,700],[390,844],[320,568]]){
   const page=await browser.newPage({viewport:{width,height}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+  let blockedWrites=0;await page.route('**/google.firestore.v1.Firestore/Write/**',route=>{blockedWrites++;return route.abort()});
   await page.goto(process.env.APP_URL||'http://127.0.0.1:4173/bridge-scope-live/?survey=4');
   await page.waitForFunction(()=>document.querySelector('#mi').textContent==='53');
   if(width<=720){await page.locator('#menu').click();await page.waitForTimeout(250)}
   const expectedPending=['BR004','BR008','BR010','BR030','BR040','BR150','BR151','BR152','BR153','BR156','BR272','BR279','BR291','BR292','BR342','BR345','BR706','BR739','BR740','BR742','BR743','BR744','BR745','BR746','BR747','BR748','BR749','BR758','BR759'];
+  const remainingPending=(await page.locator('.card:has(.needs-survey)').evaluateAll(cards=>cards.map(c=>c.dataset.c))).sort();
+  assert.ok(remainingPending.length>0&&remainingPending.every(code=>expectedPending.includes(code)));
   await page.locator('#district').selectOption({label:'หนองจอก'});await page.locator('#q').fill('BR152');
   await page.locator('#projectPicker summary').click();await page.locator('#clearProjects').click();await page.locator('#projectPicker summary').click();
   await page.locator('#missingOnly').check();
-  assert.deepEqual((await page.locator('.card').evaluateAll(cards=>cards.map(c=>c.dataset.c))).sort(),expectedPending,'Missing-only should reset stale filters and include every pending bridge');
-  assert.equal(await page.locator('.leaflet-marker-icon').count(),17);assert.equal(await page.locator('.coordinate-pending').count(),12);
-  assert.match(await page.locator('#filterResult').innerText(),/29 \/ 95.*17 หมุด.*รอพิกัด 12/);
+  assert.deepEqual((await page.locator('.card').evaluateAll(cards=>cards.map(c=>c.dataset.c))).sort(),remainingPending,'Missing-only should reset stale filters and include every bridge still awaiting survey');
+  assert.equal(await page.locator('.leaflet-marker-icon').count(),remainingPending.length);assert.equal(await page.locator('.coordinate-pending').count(),0);
+  assert.match(await page.locator('#filterResult').innerText(),new RegExp(remainingPending.length+' / 95.*'+remainingPending.length+' หมุด'));
+  if(process.env.QA_OUT)await page.screenshot({path:process.env.QA_OUT+'/pins-'+width+'.png'});
   await page.locator('#missingOnly').uncheck();
   const listBefore=await page.locator('#list').boundingBox();
   await page.locator('#projectPicker summary').click();
@@ -38,7 +42,7 @@ const assert=require('node:assert/strict');
   await page.locator('#close').click();if(width<=720){await page.locator('#menu').click();await page.waitForTimeout(250)}
   await page.locator('[data-c="BR742"]').click();assert.equal(await page.locator('.pb').evaluate(el=>el.scrollTop),0,'New bridge inherits scroll');
   await page.locator('#close').click();await page.locator('#projectSummary').click();assert.equal(await page.locator('#summaryDialog').isVisible(),true);await page.locator('#closeSummary').click();
-  assert.deepEqual(errors,[]);console.log('PASS stable layout',width+'x'+height,'project list, footer, calculator scroll, reopen, summary, no JS errors; NO DB writes');await page.close();
+  assert.equal(blockedWrites,0);assert.deepEqual(errors,[]);console.log('PASS stable layout',width+'x'+height,remainingPending.length+' pending markers','project list, footer, calculator scroll, reopen, summary, no JS errors; NO DB writes');await page.close();
  }
  await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});

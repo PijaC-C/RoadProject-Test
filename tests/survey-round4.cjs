@@ -13,6 +13,16 @@ assert.equal(Object.keys(data.round2).length,17);
 assert.equal(data.bridges.filter(b=>b.priceSource==='round3').length,36);
 assert.equal(data.bridges.filter(b=>b.priceSource==='way2').length,13);
 assert.equal(data.bridges.filter(b=>b.priceSource==='pending').length,29);
+const missing=data.bridges.filter(b=>b.priceSource==='pending');
+assert.equal(missing.filter(b=>Number.isFinite(b.lat)&&Number.isFinite(b.lng)).length,29,'Every pending survey has a map marker');
+const verifiedCoordinates={BR004:[13.74915651,100.5165535],BR706:[13.77830019,100.4771558],BR742:[13.8498238,100.8037365],BR743:[13.851946,100.8102204],BR744:[13.8522806,100.8128659],BR745:[13.8524001,100.8150167],BR746:[13.8454481,100.7953135],BR747:[13.8368079,100.7796742],BR748:[13.8332125,100.7740117],BR749:[13.8291713,100.767927],BR758:[13.7320449,100.5455445],BR759:[13.7368461,100.5390698]};
+for(const [code,[lat,lng]] of Object.entries(verifiedCoordinates)){
+  const b=data.bridges.find(b=>b.code===code);
+  assert.equal(b.lat,lat,code);assert.equal(b.lng,lng,code);
+  assert.ok(b.name!==code&&b.road&&b.district!=='ไม่ระบุเขต',code+' has verified location metadata');
+  assert.match(b.sourceRef,/2570\.xlsx/);
+}
+assert.match(data.bridges.find(b=>b.code==='BR706').project,/พระนครและสัมพันธวงศ์/,'Preserve the project until the user confirms its correction');
 const catalog=new Map([...context.window.BRIDGE_WORK_CATALOG,...data.extraCatalog].map(item=>[item.id,item]));
 for(const [code,b] of Object.entries(data.round2)){
   assert.ok(data.bridges.some(x=>x.code===code));

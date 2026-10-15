@@ -127,7 +127,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="bridge-work-catalog.js?v=20260915-3"></script>
-  <script src="survey-round4-data.js?v=20261012-1"></script>
+  <script src="survey-round4-data.js?v=20261015-1"></script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
@@ -295,7 +295,7 @@
       const old=baseline(code);
       return old?{...(old.record||{}),calculator:{...(old.record?.calculator||{}),workItems:old.items},historical:true}:null;
     }
-    function priceStatus(b){const r=R[b.code],old=baseline(b.code);return r?.updated?'บันทึกรอบ 4 · '+m(estimateTotal(r))+' บาท':old?'สำรวจรอบ '+old.round+' · '+m(old.total)+' บาท':b.priceSource==='way2'?'ราคาทาง 2 · ยังไม่มีราคารายสะพาน':b.priceSource==='round3'&&!legacyReady?'กำลังอ่านราคารอบ 3…':'ยังไม่สำรวจ · เปิดกรอกข้อมูลรอบ 4';}
+    function priceStatus(b){const r=R[b.code],old=baseline(b.code);return r?.updated?'บันทึกรอบ 4 · '+m(estimateTotal(r))+' บาท':old?'สำรวจรอบ '+old.round+' · '+m(old.total)+' บาท':b.externalPriceSource?'มีราคาจาก'+b.externalPriceSource+' · ยังไม่ได้นำเข้ายอด':b.priceSource==='way2'?'ราคาทาง 2 · ยังไม่มีราคารายสะพาน':b.priceSource==='round3'&&!legacyReady?'กำลังอ่านราคารอบ 3…':'ยังไม่สำรวจ · เปิดกรอกข้อมูลรอบ 4';}
     // Keep this in sync with the calculator's reset marker.  A mismatch here
     // causes the calculator to clear saved work-item ticks and quantities every
     // time a bridge is reopened from Firestore.
@@ -354,7 +354,7 @@
     function startDataSync(){subscribeRecords();subscribeCustomBridges();if(ROUND4)onSnapshot(collection(db,'bridge_scope_records_v3'),snap=>{legacyRecords=Object.fromEntries(snap.docs.map(x=>[x.id,normaliseRecord(x.data())]));legacyReady=true;render();if($('#summaryDialog')?.open)renderProjectSummary()},err=>{console.error('อ่านข้อมูลรอบ 3 ไม่สำเร็จ',err);setSyncStatus('อ่านข้อมูลรอบ 3 ไม่สำเร็จ')})}
 
     const projectLabel=b=>b.project||'สะพานที่เพิ่มเอง';
-    const hasSurveyData=b=>done(b.code)||!!baseline(b.code)||ROUND4&&b.priceSource==='way2';
+    const hasSurveyData=b=>done(b.code)||!!baseline(b.code)||ROUND4&&(b.priceSource==='way2'||!!b.externalPriceSource);
     function matchesFilters(b,q,d,missingOnly,projects){return (!q||`${b.code} ${b.name} ${b.road} ${projectLabel(b)}`.toLowerCase().includes(q))&&(!d||b.district===d)&&projects.has(projectLabel(b))&&(!missingOnly||!hasSurveyData(b));}
     function renderProjectSelection(){const checks=[...document.querySelectorAll('.project-check')],count=checks.filter(x=>x.checked).length;$('#allProjects').checked=count===checks.length;$('#allProjects').indeterminate=count>0&&count<checks.length;$('#projectSelectionCount').textContent=count===checks.length?'ทุกโครงการ':`${count} / ${checks.length}`;}
 
@@ -483,7 +483,7 @@
         const specialHtml='<details class="summary-special"><summary><span>ค่าใช้จ่ายพิเศษ</span><span>'+bridges.length+' สะพาน · '+specialRows[0].days+' วัน · Factor F 1.0000 · รวม '+m(specialTotal)+' บาท</span></summary><div class="summary-special-body"><p>'+bridges.length+' สะพาน · ระยะเวลาดำเนินงาน '+specialRows[0].days+' วัน · Factor F ค่าใช้จ่ายพิเศษ = 1.0000 · คิดครั้งเดียวต่อโครงการ</p>'+summaryTableHtml(specialRows)+'</div></details>';
         return '<details class="summary-project" style="border-left:5px solid '+projectColor(bridges[0])+'"><summary><span>'+e(project)+'</span><span>'+saved.length+'/'+bridges.length+' สะพานมีราคา · '+(ROUND4&&saved.length<bridges.length?'รวมเฉพาะที่มีราคา ':'รวม ')+m(total)+' บาท</span></summary><div class="summary-bridges">'+bridgeHtml+specialHtml+'</div></details>';
       }).join('');
-      host.innerHTML=(ROUND4?'<p class="round-note">ราคาเดิมคง Factor F ตามแหล่งข้อมูล · รวมค่าใช้จ่ายพิเศษครั้งเดียวต่อโครงการ · ไม่รวมสะพานที่ยังไม่มีราคารายสะพาน/ราคาทาง 2</p>':'')+'<div class="summary-total"><span>'+savedCount+'/'+bridgeCount+' สะพานมีราคา</span><span>'+(ROUND4?'รวมเฉพาะราคาที่มี ':'รวมทั้งหมดหลัง Factor F ')+m(grandTotal)+' บาท</span></div>'+projectHtml;
+      host.innerHTML=(ROUND4?'<p class="round-note">ราคาเดิมคง Factor F ตามแหล่งข้อมูล · รวมค่าใช้จ่ายพิเศษครั้งเดียวต่อโครงการ · ไม่รวมสะพานที่ยังไม่ได้นำเข้ายอดราคารายสะพาน</p>':'')+'<div class="summary-total"><span>'+savedCount+'/'+bridgeCount+' สะพานมีราคา</span><span>'+(ROUND4?'รวมเฉพาะราคาที่มี ':'รวมทั้งหมดหลัง Factor F ')+m(grandTotal)+' บาท</span></div>'+projectHtml;
     }
     function reportPage(b,r){
       const rowsData=estimateRows(r),rows=rowsData.length?rowsData.map(v=>`<tr><td>${e(v.name||'-')}</td><td>${m(v.quantity)}</td><td>${e(v.unit||'-')}</td><td>${m(v.rate)}</td><td>${Number(v.factor).toFixed(4)}</td><td>${m(v.adjustedRate)}</td><td>${m(v.amount)}</td></tr>`).join(''):'<tr><td colspan="7">ยังไม่ได้เลือกเนื้องาน</td></tr>';

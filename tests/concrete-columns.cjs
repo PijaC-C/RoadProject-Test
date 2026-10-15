@@ -1,0 +1,15 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync(require('node:path').join(__dirname,'../bridge-scope-live/bridge-paint-calculator.html'),'utf8');
+const state={survey:{structureType:'เหล็ก',concreteColumns:true,clearanceHeight:6.2,confirmedColumnCount:2},components:[{type:'span',shape:'rectangle'}]};
+const ctx={state,MARK_WIDTH:.15,COLUMN_RADIUS_M:1.5,calc:()=>({errors:[],pu:100,mortar:0,paint:0,route:20})};vm.createContext(ctx);
+vm.runInContext(html.slice(html.indexOf('function workProfile('),html.indexOf('function workAutoLabel(')),ctx);
+vm.runInContext(html.slice(html.indexOf('function columnHeightFromPdf('),html.indexOf('function updateTotals(){',html.indexOf('function calculatedTotals('))),ctx);
+const paint={condition:'concrete',auto:'concretePaint'},pu={condition:'concrete',auto:'concreteTop'};
+assert.equal(ctx.workApplicable(paint).ok,true);assert.equal(ctx.workApplicable(pu).ok,false);
+let t=ctx.calculatedTotals();const area=2*Math.PI*1.5*6.2*2;
+assert.ok(Math.abs(t.paintConcrete-area)<1e-9);assert.equal(t.topView,100);assert.equal(t.paintConcreteComplete,true);
+state.components=[];t=ctx.calculatedTotals();assert.equal(t.topViewComplete,false);assert.equal(t.paintConcreteComplete,true,'Columns do not depend on deck/stair dimensions');
+state.survey.clearanceHeight=null;t=ctx.calculatedTotals();assert.equal(t.paintConcreteAvailable,false);assert.equal(t.paintConcreteComplete,false);
+state.survey.clearanceHeight=6.2;state.survey.concreteColumns=false;assert.equal(ctx.workApplicable(paint).ok,false,'Other steel bridges unchanged');
+state.survey.structureType='คอนกรีตเสริมเหล็ก';state.components=[{type:'span',shape:'rectangle'}];t=ctx.calculatedTotals();assert.equal(ctx.workApplicable(pu).ok,true);assert.ok(Math.abs(t.paintConcrete-(100+area))<1e-9,'Original concrete top + column formula unchanged');
+console.log('PASS columns-only applicability, area, missing height, no deck dependency, unchanged concrete/steel behavior');

@@ -508,7 +508,7 @@
       calcBridgeCode=code;
       calcFrameLoaded=false;
       frame.onload=()=>{if(calcBridgeCode!==code)return;calcFrameLoaded=true;$('#save').disabled=false;$('#saveStatus').textContent='พร้อมกรอกและบันทึก';frame.contentWindow?.postMessage({type:'bridge-paint-load-state',bridgeCode:code,state:R[code]?.calculator||null,...(ROUND4&&!R[code]?.calculator&&round4Data.round2[code]?{importItems:round4Data.round2[code].items}:{})},location.origin)};
-      frame.src='bridge-paint-calculator.html?v=20261009-1&database='+(ROUND4?'round4':'202609')+'&bridge='+encodeURIComponent(code);
+      frame.src='bridge-paint-calculator.html?v=20261015-1&database='+(ROUND4?'round4':'202609')+'&bridge='+encodeURIComponent(code);
     }
     async function applyCalculatorResult(data){
       let code=data.bridgeCode;
